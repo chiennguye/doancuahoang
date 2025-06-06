@@ -45,7 +45,11 @@ const userApi = {
         const url = `users/${id}/address/status/${addressId}`
         return axiosClient.patch(url)
     },
-    deleteById: (id, addressId) => {
+    deleteById: (id) => {
+        const url = `users/${id}`
+        return axiosClient.delete(url)
+    },
+    deleteAddressById: (id, addressId) => {
         const url = `users/${id}/address/${addressId}`
         return axiosClient.delete(url)
     },
