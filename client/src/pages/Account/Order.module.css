@@ -1,0 +1,839 @@
+:root {
+  --primary-color: #539e31;
+  --secondary-color: #6cc43e;
+  --accent-color: #ee4c7e;
+  --text-primary: #2c3e50;
+  --text-secondary: #7f8c8d;
+  --bg-white: #ffffff;
+  --bg-light: #f8f9fa;
+  --bg-gray: #e9ecef;
+  --shadow-light: 0 2px 10px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0 4px 20px rgba(0, 0, 0, 0.15);
+  --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.2);
+  --border-radius: 12px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --gradient-primary: linear-gradient(
+    135deg,
+    var(--primary-color) 0%,
+    var(--secondary-color) 100%
+  );
+}
+
+/* Main Container */
+.orderContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Order Statistics */
+.orderStats {
+  margin-bottom: 30px;
+}
+
+.statCard {
+  border: none;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  transition: var(--transition);
+  height: 100%;
+}
+
+.statCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-medium);
+}
+
+.statContent {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 0;
+}
+
+.statIcon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: white;
+  flex-shrink: 0;
+}
+
+.statIcon.successIcon {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+.statIcon.pendingIcon {
+  background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+}
+
+.statInfo h4 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.statInfo p {
+  color: var(--text-secondary);
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Orders Section */
+.ordersSection {
+  margin-bottom: 20px;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: 20px;
+}
+
+.loadingText {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+/* Orders List */
+.ordersList {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.orderCard {
+  border: none;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  transition: var(--transition);
+  overflow: hidden;
+  position: relative;
+}
+
+.orderCard .card-body {
+  padding: 30px;
+}
+
+.orderCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.orderCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--gradient-primary);
+}
+
+/* Order Header */
+.orderHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid var(--bg-gray);
+}
+
+.orderNumber {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+}
+
+.orderIcon {
+  font-size: 1.3rem;
+  color: var(--primary-color);
+}
+
+.orderDate {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.dateIcon {
+  font-size: 1rem;
+  color: var(--primary-color);
+}
+
+/* Order Sections */
+.orderSection {
+  padding: 20px;
+  background: var(--bg-light);
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--bg-gray);
+}
+
+.sectionIcon {
+  font-size: 1.1rem;
+  color: var(--primary-color);
+}
+
+/* Delivery Info */
+.deliveryInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 5px 0;
+  flex: 1;
+}
+
+.infoItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  padding: 8px 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.infoItem span {
+  flex: 1;
+  min-width: 0;
+}
+
+.infoItem strong {
+  word-break: break-word;
+}
+
+.infoIcon {
+  font-size: 0.9rem;
+  color: var(--primary-color);
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+/* Status Info */
+.statusInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 5px 0;
+  flex: 1;
+}
+
+.statusBadge {
+  text-align: center;
+  padding: 5px 0;
+}
+
+.orderStatus {
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 20px;
+  border: none;
+}
+
+.paymentMethod {
+  text-align: center;
+  padding: 5px 0;
+}
+
+.methodText {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 0 12px 0;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.methodIcon {
+  font-size: 1rem;
+  color: var(--primary-color);
+}
+
+.paymentBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.85rem;
+  padding: 6px 12px;
+  border-radius: 15px;
+}
+
+.badgeIcon {
+  font-size: 0.8rem;
+}
+
+/* Total Section */
+.totalSection {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 5px 0;
+  justify-content: flex-start;
+}
+
+.totalAmount {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  padding: 20px 15px;
+  background: linear-gradient(
+    135deg,
+    rgba(83, 158, 49, 0.1) 0%,
+    rgba(108, 196, 62, 0.1) 100%
+  );
+  border-radius: 10px;
+  border: 1px solid rgba(83, 158, 49, 0.2);
+}
+
+.actionButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 5px 0;
+}
+
+.viewBtn,
+.payBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: var(--transition);
+  padding: 10px 18px;
+}
+
+.viewBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.payBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+}
+
+.btnIcon {
+  font-size: 0.9rem;
+}
+
+/* Empty Orders */
+.emptyOrders {
+  margin-top: 40px;
+}
+
+.emptyCard {
+  border: none;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+}
+
+.emptyContent {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.emptyIcon {
+  font-size: 5rem;
+  margin-bottom: 20px;
+  opacity: 0.6;
+}
+
+.emptyContent h3 {
+  color: var(--text-primary);
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.emptyContent p {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+.shopBtn {
+  background: var(--gradient-primary);
+  border: none;
+  padding: 15px 30px;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.shopBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+  color: white;
+  text-decoration: none;
+}
+
+.shopIcon {
+  font-size: 1.3rem;
+}
+
+/* Pagination */
+.paginationSection {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+}
+
+/* Modals */
+.checkoutModal .modal-content,
+.detailModal .modal-content {
+  border: none;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-hover);
+}
+
+.modalHeader {
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+}
+
+.modalHeader .modal-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+}
+
+.modalIcon {
+  font-size: 1.3rem;
+}
+
+.modalBody {
+  padding: 30px;
+}
+
+.modalFooter {
+  border: none;
+  padding: 20px 30px;
+  background: var(--bg-light);
+}
+
+/* Checkout Content */
+.checkoutContent {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.orderSummary {
+  padding: 20px;
+  background: var(--bg-light);
+  border-radius: 10px;
+  border: 1px solid var(--bg-gray);
+}
+
+.summaryTitle {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 15px;
+}
+
+.summaryItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.1rem;
+}
+
+.summaryItem strong {
+  color: var(--primary-color);
+  font-size: 1.3rem;
+}
+
+/* Payment Methods */
+.paymentMethods {
+  margin-top: 20px;
+}
+
+.methodsTitle {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 15px;
+}
+
+.methodsList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.methodItem {
+  position: relative;
+}
+
+.methodRadio {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.methodLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px;
+  border: 2px solid var(--bg-gray);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: var(--transition);
+  background: var(--bg-white);
+}
+
+.methodRadio:checked + .methodLabel {
+  border-color: var(--primary-color);
+  background: rgba(83, 158, 49, 0.1);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-light);
+}
+
+.methodLabel:hover {
+  border-color: var(--primary-color);
+  transform: translateY(-1px);
+}
+
+.methodText {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.methodImage {
+  height: 30px;
+  width: auto;
+}
+
+/* Modal Buttons */
+.cancelBtn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.checkoutBtn {
+  background: var(--gradient-primary);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.checkoutBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .orderContainer {
+    padding: 20px;
+  }
+
+  .orderCard .card-body {
+    padding: 25px;
+  }
+
+  .statContent {
+    gap: 15px;
+  }
+
+  .statIcon {
+    width: 50px;
+    height: 50px;
+    font-size: 1.3rem;
+  }
+
+  .statInfo h4 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .orderCard .card-body {
+    padding: 25px 20px;
+  }
+
+  .orderSection {
+    padding: 18px;
+  }
+
+  .orderHeader {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+    margin-bottom: 20px;
+    padding-bottom: 18px;
+  }
+
+  .actionButtons {
+    flex-direction: row;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .totalSection {
+    text-align: center;
+  }
+
+  .totalAmount {
+    font-size: 1.3rem;
+    padding: 18px 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .orderContainer {
+    padding: 15px;
+  }
+
+  .orderCard .card-body {
+    padding: 20px 15px;
+  }
+
+  .orderSection {
+    padding: 15px;
+    margin-bottom: 15px;
+  }
+
+  .statContent {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+    padding: 10px 0;
+  }
+
+  .statIcon {
+    width: 45px;
+    height: 45px;
+    font-size: 1.1rem;
+  }
+
+  .statInfo h4 {
+    font-size: 1.3rem;
+  }
+
+  .orderHeader {
+    margin-bottom: 18px;
+    padding-bottom: 15px;
+  }
+
+  .orderNumber {
+    font-size: 1rem;
+  }
+
+  .sectionTitle {
+    font-size: 0.95rem;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+  }
+
+  .infoItem {
+    flex-direction: row;
+    gap: 8px;
+    text-align: left;
+    padding: 6px 0;
+    align-items: flex-start;
+  }
+
+  .infoItem span {
+    word-break: break-word;
+    hyphens: auto;
+  }
+
+  .methodText {
+    justify-content: center;
+  }
+
+  .totalAmount {
+    font-size: 1.2rem;
+    padding: 15px 10px;
+  }
+
+  .actionButtons {
+    gap: 8px;
+    padding: 8px 0;
+  }
+
+  .viewBtn,
+  .payBtn {
+    font-size: 0.85rem;
+    padding: 8px 15px;
+  }
+
+  .modalBody {
+    padding: 25px 20px;
+  }
+
+  .methodLabel {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 576px) {
+  .orderContainer {
+    padding: 10px;
+  }
+
+  .ordersList {
+    gap: 20px;
+  }
+
+  .orderCard .card-body {
+    padding: 18px 12px;
+  }
+
+  .orderSection {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+
+  .statContent {
+    padding: 8px 0;
+  }
+
+  .statInfo h4 {
+    font-size: 1.1rem;
+  }
+
+  .statInfo p {
+    font-size: 0.85rem;
+  }
+
+  .orderHeader {
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+  }
+
+  .orderNumber {
+    font-size: 0.9rem;
+  }
+
+  .orderDate {
+    font-size: 0.85rem;
+  }
+
+  .sectionTitle {
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+  }
+
+  .infoItem {
+    font-size: 0.85rem;
+    padding: 5px 0;
+    flex-direction: row;
+    text-align: left;
+    gap: 6px;
+  }
+
+  .infoItem span {
+    word-break: break-word;
+    hyphens: auto;
+    line-height: 1.4;
+  }
+
+  .deliveryInfo {
+    gap: 8px;
+  }
+
+  .statusInfo {
+    gap: 15px;
+  }
+
+  .totalAmount {
+    font-size: 1.1rem;
+    padding: 12px 8px;
+  }
+
+  .totalSection {
+    gap: 15px;
+  }
+
+  .actionButtons {
+    flex-direction: column;
+    gap: 8px;
+    padding: 5px 0;
+  }
+
+  .viewBtn,
+  .payBtn {
+    font-size: 0.8rem;
+    padding: 8px 12px;
+  }
+
+  .emptyContent {
+    padding: 40px 15px;
+  }
+
+  .emptyContent h3 {
+    font-size: 1.5rem;
+  }
+
+  .emptyContent p {
+    font-size: 1rem;
+  }
+
+  .shopBtn {
+    font-size: 1rem;
+    padding: 12px 24px;
+  }
+
+  .modalBody {
+    padding: 20px 15px;
+  }
+
+  .methodLabel {
+    padding: 12px;
+  }
+}

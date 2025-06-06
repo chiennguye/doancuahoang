@@ -1,0 +1,514 @@
+:root {
+  --primary-color: #539e31;
+  --secondary-color: #6cc43e;
+  --accent-color: #ee4c7e;
+  --text-primary: #2c3e50;
+  --text-secondary: #7f8c8d;
+  --bg-white: #ffffff;
+  --bg-light: #f8f9fa;
+  --bg-gray: #e9ecef;
+  --shadow-light: 0 2px 10px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0 4px 20px rgba(0, 0, 0, 0.15);
+  --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.2);
+  --border-radius: 12px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --gradient-primary: linear-gradient(
+    135deg,
+    var(--primary-color) 0%,
+    var(--secondary-color) 100%
+  );
+}
+
+/* Profile Container */
+.profileContainer {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Profile Card */
+.profileCard {
+  border: none;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  overflow: hidden;
+  background: var(--bg-white);
+  transition: var(--transition);
+}
+
+.profileCard:hover {
+  box-shadow: var(--shadow-medium);
+}
+
+/* Profile Header */
+.profileHeader {
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+  padding: 30px;
+  position: relative;
+  overflow: hidden;
+}
+
+.profileHeader::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 100%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
+  );
+  transform: rotate(15deg);
+}
+
+.headerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.avatarContainer {
+  position: relative;
+}
+
+.avatar {
+  width: 80px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.avatarIcon {
+  font-size: 2.5rem;
+  color: white;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.userName {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0;
+  color: white;
+}
+
+.userEmail {
+  font-size: 1rem;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+.editIcon {
+  font-size: 1.3rem;
+}
+
+.editText {
+  font-size: 0.95rem;
+}
+
+/* Profile Body */
+.profileBody {
+  padding: 40px;
+  background: var(--bg-white);
+}
+
+/* Form Styling */
+.formGroup {
+  margin-bottom: 25px;
+}
+
+.formLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  font-size: 1rem;
+}
+
+.labelIcon {
+  font-size: 1.1rem;
+  color: var(--primary-color);
+}
+
+.inputGroup {
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: var(--transition);
+}
+
+.inputGroup:focus-within {
+  box-shadow: 0 0 0 3px rgba(83, 158, 49, 0.1);
+  transform: translateY(-1px);
+}
+
+.inputAddon {
+  background: var(--bg-light);
+  border: 2px solid #e9ecef;
+  border-right: none;
+  color: var(--text-secondary);
+  min-width: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.formControl {
+  border: 2px solid #e9ecef;
+  border-left: none;
+  padding: 12px 15px;
+  font-size: 1rem;
+  transition: var(--transition);
+  background: var(--bg-white);
+}
+
+.formControl:focus {
+  border-color: var(--primary-color);
+  box-shadow: none;
+}
+
+.formControl::placeholder {
+  color: #adb5bd;
+  font-style: italic;
+}
+
+/* Field States */
+.validField {
+  border-color: #28a745 !important;
+}
+
+.validField + .inputAddon,
+.inputGroup:has(.validField) .inputAddon {
+  border-color: #28a745;
+  background: rgba(40, 167, 69, 0.1);
+  color: #28a745;
+}
+
+.errorField {
+  border-color: #dc3545 !important;
+}
+
+.errorField + .inputAddon,
+.inputGroup:has(.errorField) .inputAddon {
+  border-color: #dc3545;
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+}
+
+.readOnlyField {
+  background: var(--bg-light) !important;
+  color: var(--text-secondary);
+  cursor: not-allowed;
+}
+
+.readOnlyField + .inputAddon,
+.inputGroup:has(.readOnlyField) .inputAddon {
+  background: var(--bg-gray);
+  color: var(--text-secondary);
+}
+
+.fieldNote {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin-top: 5px;
+  font-style: italic;
+}
+
+.errorFeedback {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 500;
+}
+
+.errorFeedback::before {
+  content: "⚠";
+  font-size: 0.9rem;
+}
+
+/* Gender Styling */
+.genderContainer {
+  display: flex;
+  gap: 20px;
+  margin-top: 8px;
+}
+
+.genderOption {
+  position: relative;
+  flex: 1;
+}
+
+.genderRadio {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.genderLabel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border: 2px solid #e9ecef;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: var(--transition);
+  background: var(--bg-white);
+  font-weight: 500;
+  color: var(--text-secondary);
+  justify-content: center;
+}
+
+.genderRadio:checked + .genderLabel {
+  border-color: var(--primary-color);
+  background: rgba(83, 158, 49, 0.1);
+  color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-light);
+}
+
+.genderLabel:hover {
+  border-color: var(--primary-color);
+  transform: translateY(-1px);
+}
+
+.genderIcon {
+  font-size: 1.3rem;
+}
+
+/* Submit Section */
+.submitSection {
+  text-align: center;
+  padding: 30px 0 10px;
+  border-top: 2px solid var(--bg-gray);
+  margin-top: 20px;
+}
+
+.submitBtn {
+  background: var(--gradient-primary);
+  border: none;
+  padding: 15px 40px;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: white;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 200px;
+  justify-content: center;
+}
+
+.submitBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+  background: var(--gradient-primary);
+}
+
+.submitBtn:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btnIcon {
+  font-size: 1.2rem;
+}
+
+.submitNote {
+  margin-top: 15px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+/* Address Section (Legacy) */
+.addressWrapper {
+  background: var(--bg-white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.addAddressBtn {
+  background: var(--gradient-primary);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.addAddressBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-light);
+}
+
+.addressWrapper table {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.addressWrapper table th,
+.addressWrapper table td {
+  padding: 12px;
+  text-align: center;
+  border-bottom: 1px solid var(--bg-gray);
+}
+
+.addressWrapper table tr td:nth-child(2) {
+  text-align: left;
+}
+
+.btnCheck {
+  color: var(--primary-color);
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btnCheck:hover {
+  color: var(--secondary-color);
+  transform: scale(1.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .profileContainer {
+    padding: 15px;
+  }
+
+  .profileHeader {
+    padding: 25px 20px;
+  }
+
+  .headerContent {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
+
+  .headerLeft {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .avatar {
+    width: 70px;
+    height: 70px;
+  }
+
+  .avatarIcon {
+    font-size: 2rem;
+  }
+
+  .userName {
+    font-size: 1.5rem;
+  }
+
+  .profileBody {
+    padding: 25px 20px;
+  }
+
+  .genderContainer {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .submitBtn {
+    width: 100%;
+    padding: 12px 30px;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .profileContainer {
+    padding: 10px;
+  }
+
+  .profileHeader {
+    padding: 20px 15px;
+  }
+
+  .avatar {
+    width: 60px;
+    height: 60px;
+  }
+
+  .avatarIcon {
+    font-size: 1.8rem;
+  }
+
+  .userName {
+    font-size: 1.3rem;
+  }
+
+  .userEmail {
+    font-size: 0.9rem;
+  }
+
+  .profileBody {
+    padding: 20px 15px;
+  }
+
+  .formLabel {
+    font-size: 0.95rem;
+  }
+
+  .formControl {
+    padding: 10px 12px;
+    font-size: 0.95rem;
+  }
+
+  .genderLabel {
+    padding: 10px 15px;
+    font-size: 0.9rem;
+  }
+
+  .submitBtn {
+    padding: 10px 25px;
+    font-size: 0.95rem;
+  }
+}

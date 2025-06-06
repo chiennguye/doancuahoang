@@ -1,0 +1,656 @@
+:root {
+  --primary-color: #539e31;
+  --secondary-color: #6cc43e;
+  --accent-color: #ee4c7e;
+  --text-primary: #2c3e50;
+  --text-secondary: #7f8c8d;
+  --bg-white: #ffffff;
+  --bg-light: #f8f9fa;
+  --bg-gray: #e9ecef;
+  --shadow-light: 0 2px 10px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0 4px 20px rgba(0, 0, 0, 0.15);
+  --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.2);
+  --border-radius: 12px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --gradient-primary: linear-gradient(
+    135deg,
+    var(--primary-color) 0%,
+    var(--secondary-color) 100%
+  );
+}
+
+/* Main Container */
+.addressContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Page Header */
+.pageHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--gradient-primary);
+  color: white;
+  padding: 30px;
+  border-radius: var(--border-radius);
+  margin-bottom: 30px;
+  box-shadow: var(--shadow-light);
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.headerIcon {
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  backdrop-filter: blur(10px);
+}
+
+.headerText h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.headerText p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 1.1rem;
+}
+
+.headerStats {
+  text-align: center;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.statNumber {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+/* Error Alert */
+.errorAlert {
+  margin-bottom: 25px;
+  border: none;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+}
+
+/* Address Section */
+.addressSection {
+  margin-bottom: 30px;
+}
+
+/* Loading */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--bg-gray);
+  border-top: 4px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingContainer p {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+/* Address Cards */
+.addressCard {
+  border: none;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  transition: var(--transition);
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.addressCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-medium);
+}
+
+.defaultCard {
+  border: 2px solid var(--primary-color);
+  background: linear-gradient(
+    135deg,
+    rgba(83, 158, 49, 0.05) 0%,
+    rgba(108, 196, 62, 0.05) 100%
+  );
+}
+
+.defaultCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--gradient-primary);
+}
+
+.addressHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.addressNumber {
+  width: 35px;
+  height: 35px;
+  background: var(--gradient-primary);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.defaultBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+  color: #2d3436;
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.defaultIcon {
+  font-size: 0.7rem;
+}
+
+.addressContent {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.addressIcon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(
+    135deg,
+    rgba(83, 158, 49, 0.1) 0%,
+    rgba(108, 196, 62, 0.1) 100%
+  );
+  color: var(--primary-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.addressText {
+  flex: 1;
+  min-width: 0;
+}
+
+.addressText p {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1rem;
+  line-height: 1.5;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.addressActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.defaultBtn,
+.deleteActionBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: var(--transition);
+  padding: 8px 15px;
+}
+
+.defaultBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.deleteActionBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.btnIcon {
+  font-size: 0.8rem;
+}
+
+/* Empty State */
+.emptyAddresses {
+  margin-top: 40px;
+}
+
+.emptyCard {
+  border: none;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+}
+
+.emptyContent {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.emptyIcon {
+  font-size: 5rem;
+  margin-bottom: 20px;
+  opacity: 0.6;
+}
+
+.emptyContent h4 {
+  color: var(--text-primary);
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.emptyContent p {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Add Button Section */
+.addButtonSection {
+  display: flex;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.addAddressBtn {
+  background: var(--gradient-primary);
+  border: none;
+  padding: 15px 30px;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 200px;
+  justify-content: center;
+}
+
+.addAddressBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+  color: white;
+}
+
+/* Add Form */
+.addFormCard {
+  border: none;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-medium);
+  margin-top: 20px;
+  overflow: hidden;
+}
+
+.formHeader {
+  background: var(--gradient-primary);
+  border: none;
+  padding: 20px;
+}
+
+.formTitle {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.formIcon {
+  font-size: 1.1rem;
+}
+
+.addForm {
+  padding: 10px 0;
+}
+
+.formGroup {
+  margin-bottom: 25px;
+}
+
+.formActions {
+  display: flex;
+  gap: 15px;
+  justify-content: flex-end;
+  padding-top: 20px;
+  border-top: 1px solid var(--bg-gray);
+}
+
+.cancelFormBtn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.submitBtn {
+  background: var(--gradient-primary);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.submitBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+/* Modal Styles */
+.deleteModal .modal-content {
+  border: none;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-hover);
+}
+
+.modalHeader {
+  background: linear-gradient(135deg, #e17055 0%, #d63031 100%);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+}
+
+.modalHeader .modal-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+}
+
+.modalIcon {
+  font-size: 1.2rem;
+}
+
+.modalBody {
+  padding: 30px;
+}
+
+.modalFooter {
+  border: none;
+  padding: 20px 30px;
+  background: var(--bg-light);
+}
+
+.deleteConfirmation {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.deleteIcon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(
+    135deg,
+    rgba(225, 112, 85, 0.1) 0%,
+    rgba(214, 48, 49, 0.1) 100%
+  );
+  color: #d63031;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin: 0 auto 20px auto;
+}
+
+.deleteConfirmation h5 {
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.addressToDelete {
+  background: var(--bg-light);
+  padding: 15px;
+  border-radius: 8px;
+  margin: 15px 0;
+  color: var(--text-primary);
+  font-weight: 500;
+  word-wrap: break-word;
+}
+
+.deleteWarning {
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.cancelBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.deleteBtn {
+  background: linear-gradient(135deg, #e17055 0%, #d63031 100%);
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.deleteBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(214, 48, 49, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .addressContainer {
+    padding: 15px;
+  }
+
+  .pageHeader {
+    padding: 25px;
+  }
+}
+
+@media (max-width: 992px) {
+  .pageHeader {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+  }
+
+  .headerContent {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .headerText h3 {
+    font-size: 1.6rem;
+  }
+
+  .headerText p {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .addressContainer {
+    padding: 10px;
+  }
+
+  .pageHeader {
+    padding: 20px 15px;
+    margin-bottom: 20px;
+  }
+
+  .headerIcon {
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+  }
+
+  .headerText h3 {
+    font-size: 1.4rem;
+  }
+
+  .headerText p {
+    font-size: 0.95rem;
+  }
+
+  .statNumber {
+    font-size: 2rem;
+  }
+
+  .addressActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .defaultBtn,
+  .deleteActionBtn {
+    justify-content: center;
+  }
+
+  .formActions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .cancelFormBtn,
+  .submitBtn {
+    justify-content: center;
+  }
+
+  .addAddressBtn {
+    font-size: 1rem;
+    padding: 12px 25px;
+    min-width: 180px;
+  }
+}
+
+@media (max-width: 576px) {
+  .addressCard .card-body {
+    padding: 20px 15px;
+  }
+
+  .addressContent {
+    gap: 10px;
+  }
+
+  .addressIcon {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
+  }
+
+  .addressText p {
+    font-size: 0.9rem;
+  }
+
+  .emptyContent {
+    padding: 40px 15px;
+  }
+
+  .emptyContent h4 {
+    font-size: 1.5rem;
+  }
+
+  .emptyContent p {
+    font-size: 1rem;
+  }
+
+  .modalBody {
+    padding: 20px 15px;
+  }
+
+  .deleteConfirmation {
+    padding: 15px 0;
+  }
+
+  .deleteIcon {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+}
