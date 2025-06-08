@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { updateQuantity, removeItem } from "../../../redux/actions/cart";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 
 import { FaTrashAlt, FaPlus, FaMinus } from "react-icons/fa";
 import { AiOutlineHeart, AiOutlineEdit } from "react-icons/ai";
@@ -12,16 +13,18 @@ import { Button } from "react-bootstrap";
 
 export default function CartItem(props) {
   const dispatch = useDispatch();
+  const maxQuantity = props.product?.quantity || 0;
 
   const [quantity, setQuantity] = useState(props.quantity);
   const [totalPriceItem, setTotalPriceItem] = useState(props.totalPriceItem);
-<Button
-  variant="outline-secondary"
-  size="sm"
-  className={styles.favoriteBtn}
-  title="Yêu thích"
-></Button>
+
   function increaseQuantity() {
+    if (quantity >= maxQuantity) {
+      toast.error(`Chỉ còn ${maxQuantity} cuốn trong kho!`, {
+        autoClose: 2000,
+      });
+      return;
+    }
     setQuantity((preValue) => preValue + 1);
     setTotalPriceItem(props.price * (quantity + 1));
   }
@@ -34,10 +37,22 @@ export default function CartItem(props) {
   }
 
   function handleChange(event) {
-    const value =
-      parseInt(event.target.value) > 0 ? parseInt(event.target.value) : 1;
-    setQuantity(value);
-    setTotalPriceItem(props.price * value);
+    const value = parseInt(event.target.value);
+    if (value > maxQuantity) {
+      toast.error(`Chỉ còn ${maxQuantity} cuốn trong kho!`, {
+        autoClose: 2000,
+      });
+      setQuantity(maxQuantity);
+      setTotalPriceItem(props.price * maxQuantity);
+      return;
+    }
+    if (value > 0) {
+      setQuantity(value);
+      setTotalPriceItem(props.price * value);
+    } else {
+      setQuantity(1);
+      setTotalPriceItem(props.price);
+    }
   }
 
   const handleRemoveItem = (productId) => {
@@ -64,6 +79,11 @@ export default function CartItem(props) {
             <span className={styles.unitPrice}>
               Đơn giá: {format.formatPrice(props.price)}
             </span>
+            {maxQuantity > 0 && (
+              <span className={styles.stockInfo}>
+                Còn lại: {maxQuantity} cuốn
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -84,11 +104,18 @@ export default function CartItem(props) {
             value={quantity}
             onChange={handleChange}
             min="1"
+            max={maxQuantity}
           />
-          <button className={styles.quantityBtn} onClick={increaseQuantity}>
+          <button 
+            className={styles.quantityBtn} 
+            onClick={increaseQuantity}
+            disabled={quantity >= maxQuantity}
+          >
             <FaPlus />
           </button>
-          <Button variant="danger" onClick={() => handleRemoveItem(props.productId)}><FaTrashAlt /></Button>
+          <Button variant="danger" onClick={() => handleRemoveItem(props.productId)}>
+            <FaTrashAlt />
+          </Button>
         </div>
       </div>
 

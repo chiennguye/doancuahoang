@@ -30,7 +30,16 @@ const cartReducer = (state = initialState, action) => {
                 }
             })
             if (!isFind) {
-                newList.push({product: {_id: productId, price, ...data}, quantity: quantity, totalPriceItem: quantity * price })
+                newList.push({
+                    product: {
+                        _id: productId,
+                        price,
+                        quantity: action.payload.product.quantity,
+                        ...data
+                    },
+                    quantity: quantity,
+                    totalPriceItem: quantity * price
+                })
             }   
 
             const subTotal = newList.reduce((sum, product) => sum + product.totalPriceItem, 0)
@@ -175,15 +184,28 @@ const cartReducer = (state = initialState, action) => {
        }
 
        case "SET_CART": {
+            const newList = action.payload;
+            const { voucher, shippingFee } = state;
+            const { value, by, minimum } = voucher;
+
+            const subTotal = newList.reduce((sum, product) => sum + product.totalPriceItem, 0);
+            
+            let updateVoucher = voucher;
+            let discount = 0;
+            if (subTotal < minimum) {
+                updateVoucher = {};
+            } else if (value > 0) {
+                discount = by === "percent" ? (subTotal * value / 100) : (value);
+            }
+
             return {
                 ...state,
-                list: action.payload,
-                voucher: "",
-                subTotal: 0,
-                shippingFee: 0,
-                discount: 0,
-                total: 0,
-        }
+                list: newList,
+                voucher: updateVoucher,
+                subTotal: subTotal,
+                discount: discount,
+                total: subTotal - discount + shippingFee,
+            };
        }
 
         default: {

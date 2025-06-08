@@ -2,6 +2,9 @@ import { useCallback, useEffect, useState } from "react";
 import { Row, Col, Table, Spinner, Modal, Badge, Button } from "react-bootstrap";
 import moment from 'moment'
 import { FaEdit, FaEye } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { useBook } from "../../../contexts/BookContext";
+import { toast } from 'react-toastify';
 
 import PaginationBookStore from "../../../components/PaginationBookStore";
 import OrderProgress from "../../../components/OrderProgress";
@@ -12,7 +15,8 @@ import orderApi from "../../../api/orderApi";
 import format from "../../../helper/format";
 
 export default function OrderList() {
- 
+  const navigate = useNavigate();
+  const { triggerRefresh } = useBook();
   const [orderData, setOrderData] = useState({});
   const [page, setPage] = useState(1);
 
@@ -70,35 +74,47 @@ export default function OrderList() {
     }
   };
 
-  const handleCallApiChangeStatus = async () => {
+  const handleUpdateStatus = async () => {
     try {
-      setLoadingUpdate(true)
-      const { data } = await orderApi.updateOrderStatus(orderDetail?._id, { orderStatusCode: +orderDetail?.orderStatus?.code + 1});
-      setLoadingUpdate(false)
-      const { orderStatus, paymentStatus } = data
-      setOrderDetail((pre) => {
-        return {
-          ...pre,
-          orderStatus,
-          paymentStatus
-        };
+      setLoadingUpdate(true);
+      const { data } = await orderApi.updateOrderStatus(orderDetail?._id, { 
+        orderStatusCode: +orderDetail?.orderStatus?.code + 1
       });
-      setOrderData((pre) => {
-        const newArray = [...pre.orders];
-        return {
-          ...pre,
-          orders: newArray.map((item) => {
-            return item?._id === orderDetail?._id
-              ? { ...item, orderStatus, paymentStatus }
-              : item;
-          }),
-        };
-      });
-      alert("Cập nhật thành công!");
+      
+      const { orderStatus, paymentStatus } = data;
+      
+      // Cập nhật lại thông tin đơn hàng
+      setOrderDetail((pre) => ({
+        ...pre,
+        orderStatus,
+        paymentStatus
+      }));
+
+      // Cập nhật lại danh sách đơn hàng
+      setOrderData((pre) => ({
+        ...pre,
+        orders: pre.orders.map((item) => 
+          item?._id === orderDetail?._id
+            ? { ...item, orderStatus, paymentStatus }
+            : item
+        )
+      }));
+
+      // Nếu đơn hàng đã hoàn thành (status = 6), kích hoạt refresh để cập nhật danh sách sách
+      if (orderStatus.code === steps.length - 1) {
+        // Đợi một chút để đảm bảo server đã cập nhật xong
+        setTimeout(() => {
+          triggerRefresh();
+        }, 500);
+      }
+      
+      toast.success("Cập nhật trạng thái thành công!");
     } catch (error) {
-      alert("Cập nhật thất bại!");
-      setLoadingUpdate(false)
-      console.log(error);
+      console.error("Error updating status:", error);
+      toast.error("Có lỗi xảy ra khi cập nhật trạng thái!");
+    } finally {
+      setLoadingUpdate(false);
+      setShowModalUpdate(false);
     }
   };
 
@@ -119,7 +135,7 @@ export default function OrderList() {
               <p className="mb-4">Trạng thái đơn hàng: <b>{orderDetail?.orderStatus?.text}</b></p>
               <OrderProgress current={orderDetail?.orderStatus?.code} />
               {orderDetail?.orderStatus?.code < steps?.length - 1 && (
-                <Button variant="success" disabled={loadingUpdate} className="mt-4 d-flex" style={{margin: "0 auto"}} onClick={handleCallApiChangeStatus}>
+                <Button variant="success" disabled={loadingUpdate} className="mt-4 d-flex" style={{margin: "0 auto"}} onClick={handleUpdateStatus}>
                   Chuyển sang trạng thái tiếp theo
                 </Button>
               )}

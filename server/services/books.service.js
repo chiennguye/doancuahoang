@@ -1,14 +1,18 @@
 const Book = require('../models/books.model')
 const Order = require('../models/orders.model')
 const mongoose = require("mongoose");
+const redis = require('../config/redis');
 
 const bookService = {
     getAll: async({query, page, limit, sort}) => {
         const skip = (page - 1) * limit
-            
-        return await Promise.all([
+        console.log('Getting books with query:', query);
+        const [count, books] = await Promise.all([
             Book.countDocuments(query), 
-            Book.find(query).populate('genre author publisher').skip(skip).limit(limit).sort(sort)])
+            Book.find(query).populate('genre author publisher').skip(skip).limit(limit).sort(sort)
+        ]);
+        console.log('Books from database:', books.map(b => ({ id: b._id, name: b.name, quantity: b.quantity })));
+        return [count, books];
     },
     getByBookId: async(bookId) => {
         return await Book.findOne({bookId: bookId}).populate('author publisher genre')
@@ -58,11 +62,17 @@ const bookService = {
         return await Book.aggregate(query)
     },
     create: async(body) => {
-        const { bookId, name, year, genre, author, publisher, description,
-            pages, size, price, discount, imageUrl, publicId } = body
-        const newBook = new Book({bookId, name, year, genre, description,
-            author, publisher, pages, size, price, discount, imageUrl, publicId})
-        return await newBook.save()
+        try {
+            const { quantity, ...bookData } = body;
+            const newBook = new Book({
+                ...bookData,
+                quantity: quantity || 0
+            });
+            const savedBook = await newBook.save();
+            return savedBook;
+        } catch (error) {
+            throw error;
+        }
     },
     updateById: async(id, body) => {
         try {
@@ -72,11 +82,11 @@ const bookService = {
             }
         
             const { name, year, genre, author, publisher, description,
-                pages, size, price, discount, imageUrl, publicId } = body;
+                pages, size, price, discount, quantity, imageUrl, publicId } = body;
 
             const updateData = {
                 name, year, genre, author, publisher, description,
-                pages, size, price, discount
+                pages, size, price, discount, quantity
             };
 
             if (imageUrl) {
@@ -99,6 +109,38 @@ const bookService = {
     },
     deleteById: async(id) => {
         return await Book.findByIdAndDelete(id)
+    },
+    updateQuantity: async(id, newQuantity) => {
+        try {
+            console.log('📦 Updating book quantity:', { id, newQuantity });
+            
+            // Use findOneAndUpdate to ensure atomic operation
+            const updatedBook = await Book.findOneAndUpdate(
+                { _id: id },
+                { $set: { quantity: newQuantity } },
+                { new: true }
+            ).populate('genre author publisher');
+
+            if (!updatedBook) {
+                console.log('❌ Book not found:', id);
+                return null;
+            }
+
+            console.log('✅ Book updated successfully:', {
+                id: updatedBook._id,
+                name: updatedBook.name,
+                oldQuantity: updatedBook.quantity,
+                newQuantity
+            });
+
+            return {
+                book: updatedBook,
+                message: 'Cập nhật số lượng thành công'
+            };
+        } catch (error) {
+            console.error('❌ Error updating book quantity:', error);
+            throw error;
+        }
     }
 }
 

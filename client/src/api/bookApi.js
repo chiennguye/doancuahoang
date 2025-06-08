@@ -36,8 +36,11 @@ const bookApi = {
     delete: (id) => {
         const url = `books/${id}`
         return axiosClient.delete(url)
+    },
+    triggerRefresh: () => {
+        const url = 'books/trigger-refresh'
+        return axiosClient.get(url)
     }
-
 }
 
 export default bookApi

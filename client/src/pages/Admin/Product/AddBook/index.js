@@ -64,6 +64,7 @@ function AddBook() {
       size: "",
       price: "",
       discount: 0,
+      quantity: 0,
       image: "",
       description: "",
       author: [],
@@ -88,6 +89,10 @@ function AddBook() {
       price: Yup.number()
         .typeError("Vui lòng nhập giá hợp lệ!")
         .required("Không được bỏ trống trường này!"),
+      quantity: Yup.number()
+        .typeError("Vui lòng nhập số lượng hợp lệ!")
+        .min(0, "Số lượng không được âm")
+        .required("Không được bỏ trống trường này!"),
       image: Yup.mixed().required("Không được bỏ trống trường này!")
       .test("FILE_SIZE", "Kích thước file quá lớn!", (value) => !value || (value && value.size < 1024 * 1024))
       .test("FILE_FORMAT", "File không đúng định dạng!", (value) => 
@@ -96,7 +101,7 @@ function AddBook() {
     }),
     onSubmit: async () => {
       const { bookId, name, author, genre, publisher, description, 
-        year, pages, size, price, discount, image } = formik.values;
+        year, pages, size, price, discount, quantity, image } = formik.values;
       const genres = genre.map(item => item.value)
       const authors = author.map(item => item.value)
       try {
@@ -108,7 +113,7 @@ function AddBook() {
         const { secure_url, public_id } = resCloudinary.data
         if (secure_url && public_id) {
           const res = await bookApi.create({ 
-            bookId, name, year, pages, size, price, discount, description,
+            bookId, name, year, pages, size, price, discount, quantity, description,
             author: authors,
             genre: genres,
             publisher: publisher,
@@ -362,9 +367,9 @@ function AddBook() {
                     <label className={styles.formLabel}>Giảm giá</label>
                     <input
                       type="number"
-                      name="discount"
                       min="0"
                       max="100"
+                      name="discount"
                       className={`form-control ${
                         formik.errors.discount && formik.touched.discount
                           ? "is-invalid"
@@ -378,6 +383,30 @@ function AddBook() {
                     {formik.errors.discount && (
                       <Form.Control.Feedback type="invalid">
                         {formik.errors.discount}
+                      </Form.Control.Feedback>
+                    )}
+                  </div>
+                </Col>
+                <Col xl={3}>
+                  <div className="form-group">
+                    <label className={styles.formLabel}>Số lượng</label>
+                    <input
+                      type="number"
+                      min="0"
+                      name="quantity"
+                      className={`form-control ${
+                        formik.errors.quantity && formik.touched.quantity
+                          ? "is-invalid"
+                          : formik.values.quantity && "is-valid"
+                      }`}
+                      placeholder="Số lượng"
+                      value={formik.values.quantity}
+                      onBlur={formik.handleBlur}
+                      onChange={formik.handleChange}
+                    />
+                    {formik.errors.quantity && (
+                      <Form.Control.Feedback type="invalid">
+                        {formik.errors.quantity}
                       </Form.Control.Feedback>
                     )}
                   </div>

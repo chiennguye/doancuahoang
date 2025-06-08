@@ -51,10 +51,12 @@ import { login, logout } from "./redux/actions/auth";
 import { setCart } from "./redux/actions/cart";
 
 import { roleEnum } from "./layouts/components/SideBar/routes";
+import { BookProvider } from './contexts/BookContext';
 
 function App() {
   const currentUser = useSelector((state) => state.auth);
   const dispatch = useDispatch();
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -79,7 +81,7 @@ function App() {
             price - price * ((discount > 0 ? discount : 0) / 100);
           return {
             ...item,
-            product: { ...item.product, price: newPrice },
+            product: { ...item.product, price: newPrice, quantity: item.product.quantity },
             totalPriceItem: newPrice * item.quantity,
           };
         });
@@ -98,8 +100,7 @@ function App() {
   }, [dispatch, currentUser]);
 
   return (
-    <div className="App">
-      <ToastContainer />
+    <BookProvider>
       <Routes>
         <Route path="/" element={<DefaultLayout />}>
           <Route path="/" element={<Home />} />
@@ -190,7 +191,8 @@ function App() {
 
         <Route path="*" element={<NotFound />} />
       </Routes>
-    </div>
+      <ToastContainer />
+    </BookProvider>
   );
 }
 

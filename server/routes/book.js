@@ -14,6 +14,6 @@ router.get('/:id', bookController.getById)
 router.post('/', verifyToken, checkRole([RoleEnum.Staff, RoleEnum.Admin]), bookController.create)
 router.put('/:id', verifyToken, checkRole([RoleEnum.Staff, RoleEnum.Admin]), bookController.updateById)
 router.delete('/:id', verifyToken, checkRole([RoleEnum.Staff, RoleEnum.Admin]), bookController.deleteById)
-
+router.get('/trigger-refresh', bookController.triggerRefresh)
 
 module.exports = router;

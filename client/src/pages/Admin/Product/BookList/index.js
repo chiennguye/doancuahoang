@@ -1,46 +1,64 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 import { toast } from 'react-toastify';
 import PaginationBookStore from "../../../../components/PaginationBookStore";
 import { FaEdit, FaTrashAlt, FaSearch } from "react-icons/fa"
-
+import { useBook } from "../../../../contexts/BookContext";
 
 import { Row, Col, Table, Spinner, Modal, Button } from "react-bootstrap";
 import bookApi from "../../../../api/bookApi";
 import format from "../../../../helper/format";
 
 function BookList() {
+  const location = useLocation();
+  const { shouldRefresh, lastUpdateTime } = useBook();
   const [bookData, setBookData] = useState({});
   const [page, setPage] = useState(1);
-
   const [loading, setLoading] = useState(false);
-
-  const [bookDelete, setBookDelete] = useState({})
-
+  const [bookDelete, setBookDelete] = useState({});
   const [showModal, setShowModal] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
+  const [searchString, setSearchString] = useState("");
 
-  const [searchInput, setSearchInput] = useState("")
-  const [searchString, setSearchString] = useState("")
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const query = {
-          name: { "$regex": searchString, "$options": "i" }
-        }
-        console.log(query)
-        const res = await bookApi.getAll({ query, page: page, limit: 10 });
-        setLoading(false);
-        setBookData({ books: res.data, totalPage: res.pagination.totalPage });
-      } catch (error) {
-        setLoading(false);
-        console.log(error);
-      }
-    };
-    fetchData();
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const query = {
+        name: { "$regex": searchString, "$options": "i" }
+      };
+      const res = await bookApi.getAll({ 
+        query, 
+        page: page, 
+        limit: 10,
+        timestamp: Date.now() // Force fetch mới
+      });
+      setLoading(false);
+      setBookData({ books: res.data, totalPage: res.pagination.totalPage });
+    } catch (error) {
+      setLoading(false);
+      console.error('Error fetching books:', error);
+    }
   }, [page, searchString]);
 
+  // Fetch data khi component mount
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // Fetch data khi có refresh trigger
+  useEffect(() => {
+    if (shouldRefresh) {
+      fetchData();
+    }
+  }, [shouldRefresh, lastUpdateTime, fetchData]);
+
+  // Fetch data khi có location state update
+  useEffect(() => {
+    if (location.state?.updated) {
+      fetchData();
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state?.updated, fetchData]);
 
   const handleChangePage = useCallback((page) => {
     setPage(page);
@@ -48,26 +66,20 @@ function BookList() {
 
   const handleCallApiDelete = async (e) => {
     try {
-      const { data: orders } = await bookApi.checkIsOrdered(bookDelete._id)
+      const { data: orders } = await bookApi.checkIsOrdered(bookDelete._id);
       if (orders.length > 0) {
-        toast.error('Sản phẩm đã được mua, không thể xóa!', {autoClose: 2000})
-        return
+        toast.error('Sản phẩm đã được mua, không thể xóa!', {autoClose: 2000});
+        return;
       }
-      await bookApi.delete(bookDelete._id)
-      toast.success("Xóa thành công!", {autoClose: 2000})
-      setShowModal(false)
-      setBookData((preState) => {
-        const newArray = [...preState.books];
-        return {
-          ...preState,
-          books: newArray.filter((item) => item._id !== bookDelete._id)
-        }
-      });
+      await bookApi.delete(bookDelete._id);
+      toast.success("Xóa thành công!", {autoClose: 2000});
+      setShowModal(false);
+      fetchData(); // Fetch lại data sau khi xóa
     } catch (error) {
-      alert("Xóa thất bại!")
-      setShowModal(false)
+      toast.error("Xóa thất bại!");
+      setShowModal(false);
     }
-  }
+  };
 
   return (
     <Row>
@@ -90,14 +102,22 @@ function BookList() {
           <div className="admin-content-header">Danh sách sản phẩm</div>
           <div className="admin-content-action">
             <div className="d-flex">
-              <input className="form-control search" placeholder="Tìm kiếm" value={searchInput} onChange={(e) => setSearchInput(e.target.value)} />
-              <Button type="button" style={{color: "white"}} variant="info"
+              <input 
+                className="form-control search" 
+                placeholder="Tìm kiếm" 
+                value={searchInput} 
+                onChange={(e) => setSearchInput(e.target.value)} 
+              />
+              <Button 
+                type="button" 
+                style={{color: "white"}} 
+                variant="info"
                 onClick={() => {
-                  setSearchString(searchInput)
-                  setPage(1)
+                  setSearchString(searchInput);
+                  setPage(1);
                 }}
-                >
-                  <FaSearch />
+              >
+                <FaSearch />
               </Button>
             </div>
           </div>
@@ -111,17 +131,15 @@ function BookList() {
                   <th>Xuất bản</th>
                   <th>Giá</th>
                   <th>Khuyến mãi (%)</th>
+                  <th>Số lượng</th>
                   <th colSpan="2">Hành động</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={7}>
-                      <Spinner
-                        animation="border"
-                        variant="success"
-                      />
+                    <td colSpan={8}>
+                      <Spinner animation="border" variant="success" />
                     </td>
                   </tr>
                 ) : bookData.books && bookData.books.length > 0 ? (
@@ -140,6 +158,7 @@ function BookList() {
                         </td>
                         <td className="price">{format.formatPrice(item.price)}</td>
                         <td>{item.discount}</td>
+                        <td>{item.quantity || 0}</td>
                         <td>
                           <Link
                             to={`/admin/book/update/${item._id}`}
@@ -153,8 +172,8 @@ function BookList() {
                           <button
                             className="btn btn-danger"
                             onClick={() => {
-                              setBookDelete(item)
-                              setShowModal(true)
+                              setBookDelete(item);
+                              setShowModal(true);
                             }}
                           >
                             <FaTrashAlt />
@@ -165,7 +184,7 @@ function BookList() {
                   })
                 ) : (
                   <tr>
-                    <td colSpan={7}>Không có sản phẩm nào!</td>
+                    <td colSpan={8}>Không có sản phẩm nào!</td>
                   </tr>
                 )}
               </tbody>

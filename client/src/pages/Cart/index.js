@@ -233,6 +233,7 @@ function Cart() {
                             price={item.product.price}
                             quantity={item.quantity}
                             totalPriceItem={item.totalPriceItem}
+                            product={item.product}
                           />
                           
                         </div>

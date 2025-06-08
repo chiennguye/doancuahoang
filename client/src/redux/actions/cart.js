@@ -1,7 +1,23 @@
-export const addToCart = (product) => {
+export const addToCart = (itemData) => {
     return  {
         type: 'ADD_TO_CART',
-        payload: product
+        payload: {
+            quantity: itemData.quantity,
+            productId: itemData.productId,
+            name: itemData.name,
+            imageUrl: itemData.imageUrl,
+            slug: itemData.slug,
+            price: itemData.price,
+            totalPriceItem: itemData.totalPriceItem,
+            product: {
+                _id: itemData.product._id,
+                name: itemData.product.name,
+                imageUrl: itemData.product.imageUrl,
+                slug: itemData.product.slug,
+                price: itemData.product.price,
+                quantity: itemData.product.quantity // This is the available stock quantity
+            }
+        }
     }
 }
 

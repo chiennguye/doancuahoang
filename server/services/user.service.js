@@ -30,7 +30,10 @@ const userService = {
         return await User.findById(userId).select({"address": 1})
     },
     getCartByUserId: async(userId) => {
-        return await User.findById(userId).select({"cart": 1}).populate("cart.product")
+        return await User.findById(userId).select({"cart": 1}).populate({
+            path: 'cart.product',
+            select: 'name imageUrl slug price quantity'
+        })
     },
     addAddressByUserId: async(userId, { addressId, address }) => {
         return await User.findByIdAndUpdate(userId, {

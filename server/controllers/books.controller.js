@@ -1,6 +1,6 @@
 const bookService = require('../services/books.service')
-const redis = require('../config/redis')
 const { cloudinary } = require('../config/cloudinary')
+const Book = require('../models/books.model')
 
 const bookController = {
     getAll: async(req, res) => {
@@ -11,33 +11,12 @@ const bookController = {
             const { query } = req.query
 
             const queryObj = !!query ? query : {}
+            console.log('📚 Getting books with query:', queryObj);
 
-            const key = `Book::${JSON.stringify({queryObj, page, limit, sort})}`
+            const [count, data] = await bookService.getAll({query: queryObj, page, limit, sort})
+            console.log('📚 Books from database:', data.map(b => ({ id: b._id, name: b.name, quantity: b.quantity })));
 
-            let count, data, totalPage
-
-            try {
-                const cache = await redis.get(key)
-
-                if (cache) {
-                    const json = JSON.parse(cache)
-                    count = json.count
-                    data = json.data
-                } else {
-                    const [countNum, bookList] = await bookService.getAll({query: queryObj, page, limit, sort})
-                    count = countNum
-                    data = bookList
-                    redis.setex(key, 600, JSON.stringify({count, data}))
-                }
-
-            } catch (error) {
-                const [countNum, bookList] = await bookService.getAll({query: queryObj, page, limit, sort})
-                count = countNum
-                data = bookList
-                console.log('Redis error::::' + error.message)
-            }
-
-            totalPage = Math.ceil(count / limit)
+            const totalPage = Math.ceil(count / limit)
             
             res.status(200).json({
                 message: 'success',
@@ -51,6 +30,7 @@ const bookController = {
                 }
             })
         } catch (error) {
+            console.error('❌ Error in getAll:', error);
             res.status(500).json({
                 message: `Có lỗi xảy ra! ${error.message}`,
                 error: 1,
@@ -110,25 +90,7 @@ const bookController = {
     getBySlug: async(req, res) => {
         try {
             const { slug } = req.params
-
-            let response
-
-            const key = `Book::${slug}`
-
-            try {
-                const cache = await redis.get(key)
-
-                if (cache) {
-                    response = JSON.parse(cache).response
-                } else {
-                    response = await bookService.getBySlug(slug)
-                    redis.setex(key, 600, JSON.stringify({response}))
-                }
-
-            } catch (error) {
-                response = await bookService.getBySlug(slug)
-                console.log('Redis error::::' + error.message)
-            }
+            const response = await bookService.getBySlug(slug)
 
             if (response) {
                 res.status(200).json({
@@ -175,6 +137,20 @@ const bookController = {
             })
         }
     },
+    triggerRefresh: async(req, res) => {
+        try {
+            res.status(200).json({
+                message: 'success',
+                error: 0,
+                data: { timestamp: Date.now() }
+            })
+        } catch (error) {
+            res.status(500).json({
+                message: `Có lỗi xảy ra! ${error.message}`,
+                error: 1,
+            })
+        }
+    },
     searchBook: async(req, res) => {
         try {
             const { key } = req.query
@@ -197,15 +173,12 @@ const bookController = {
     },
     create: async(req, res) => {
         try {
+            console.log('Request body khi tạo sách mới:', req.body);
             const { bookId } = req.body
             const isExist = await bookService.getByBookId(bookId)
             if (isExist) return res.status(400).json({message: "bookId đã tồn tại!", error: 1}) 
             const data = await bookService.create(req.body)
-
-            // clean cache
-            const keys = await redis.keys('Book::*')
-            if (keys.length > 0)
-                redis.del(keys)
+            console.log('Dữ liệu sách sau khi tạo:', data);
 
             return res.status(201).json({
                 message: 'success',
@@ -213,6 +186,7 @@ const bookController = {
                 data
             })
         } catch (error) {
+            console.error('Lỗi khi tạo sách:', error);
             res.status(400).json({
                 message: `Có lỗi xảy ra! ${error.message}`,
                 error: 1,
@@ -254,15 +228,6 @@ const bookController = {
             }
          
             if (data) {
-                try {
-                    const keys = await redis.keys('Book::*');
-                    if (keys.length > 0) {
-                        await redis.del(keys);
-                    }
-                } catch (cacheError) {
-                    // Bỏ qua lỗi cache
-                }
-                
                 return res.status(200).json({
                     message: 'success',
                     error: 0,
@@ -291,11 +256,6 @@ const bookController = {
             const data = await bookService.deleteById(id)
             if (data) {
                 await cloudinary.uploader.destroy(data?.publicId)
-
-                   // clean cache
-                const keys = await redis.keys('Book::*')
-                if (keys.length > 0)
-                    redis.del(keys)
 
                 return res.status(200).json({
                     message: 'success',

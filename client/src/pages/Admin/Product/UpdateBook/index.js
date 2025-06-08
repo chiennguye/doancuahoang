@@ -14,6 +14,7 @@ import genreApi from "../../../../api/genreApi";
 import bookApi from "../../../../api/bookApi";
 import publisherApi from "../../../../api/publisherApi";
 import styles from "./UpdateBook.module.css";
+import { useBook } from "../../../../contexts/BookContext";
 
 function UpdateBook() {
 
@@ -21,6 +22,7 @@ function UpdateBook() {
   const { id } = params
 
   const navigate = useNavigate();
+  const { triggerRefresh } = useBook();
 
   const [authorList, setAuthorList] = useState([]);
   const [genreList, setGenreList] = useState([]);
@@ -108,6 +110,7 @@ function UpdateBook() {
       size: bookData.size ? bookData.size : "",
       price: bookData.price ? bookData.price : "",
       discount: bookData.discount ? bookData.discount : "",
+      quantity: bookData.quantity ? bookData.quantity : 0,
       description: bookData.description ? bookData.description : "",
       author: bookData.author ? bookData.author : [],
       genre: bookData?.genre ? bookData.genre : [],
@@ -122,6 +125,10 @@ function UpdateBook() {
       price: Yup.number()
         .typeError("Vui lòng nhập giá hợp lệ!")
         .required("Không được bỏ trống trường này!"),
+      quantity: Yup.number()
+        .typeError("Vui lòng nhập số lượng hợp lệ!")
+        .min(0, "Số lượng không được âm")
+        .required("Không được bỏ trống trường này!"),
       image: updateImage && Yup.mixed().required("Không được bỏ trống trường này!")
       .test("FILE_SIZE", "Kích thước file quá lớn!", (value) => !value || (value && value.size < 1024 * 1024))
       .test("FILE_FORMAT", "File không đúng định dạng!", (value) => 
@@ -130,7 +137,7 @@ function UpdateBook() {
     }),
     onSubmit: async () => {
       const { bookId, name, author, genre, publisher, description, 
-        year, pages, size, price, discount, image } = formik.values;
+        year, pages, size, price, discount, quantity, image } = formik.values;
       try {
         if (image) {
           const formData = new FormData();
@@ -156,7 +163,8 @@ function UpdateBook() {
               pages, 
               size, 
               price, 
-              discount, 
+              discount,
+              quantity,
               description,
               author: author.map(a => a.value),
               genre: genre.map(g => g.value),
@@ -184,7 +192,8 @@ function UpdateBook() {
               pages, 
               size, 
               price, 
-              discount, 
+              discount,
+              quantity,
               description,
               author: author.map(a => a.value),
               genre: genre.map(g => g.value),
@@ -193,7 +202,8 @@ function UpdateBook() {
             await bookApi.update(id, updateData);
         }
         alert("Lưu thay đổi thành công!")
-        navigate({ pathname: "/admin/book" });
+        navigate("/admin/book", { state: { updated: true } });
+        triggerRefresh();
         
       } catch (error) {
         if (error.response) {
@@ -438,6 +448,33 @@ function UpdateBook() {
                         className={styles.feedback}
                       >
                         {formik.errors.discount}
+                      </Form.Control.Feedback>
+                    )}
+                  </div>
+                </Col>
+                <Col xl={3}>
+                  <div className="form-group">
+                    <label className={styles.formLabel}>Số lượng</label>
+                    <input
+                      type="number"
+                      min="0"
+                      name="quantity"
+                      className={`form-control ${
+                        formik.errors.quantity
+                          ? "is-invalid"
+                          : formik.values.quantity && "is-valid"
+                      }`}
+                      placeholder="Số lượng"
+                      value={formik.values.quantity}
+                      onBlur={formik.handleBlur}
+                      onChange={formik.handleChange}
+                    />
+                    {formik.errors.quantity && (
+                      <Form.Control.Feedback
+                        type="invalid"
+                        className={styles.feedback}
+                      >
+                        {formik.errors.quantity}
                       </Form.Control.Feedback>
                     )}
                   </div>

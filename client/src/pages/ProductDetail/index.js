@@ -29,6 +29,7 @@ import { addToCart } from "../../redux/actions/cart";
 import { useDispatch, useSelector } from "react-redux";
 import format from "../../helper/format";
 import styles from "./ProductDetail.module.css";
+import { useBook } from "../../contexts/BookContext";
 
 export default function ProductDetail() {
   const dispatch = useDispatch();
@@ -38,6 +39,7 @@ export default function ProductDetail() {
 
   const cartData = useSelector((state) => state.cart);
   const currentUser = useSelector((state) => state.auth);
+  const { shouldRefresh, lastUpdateTime } = useBook();
 
   const [bookData, setBookData] = useState({});
   const [loading, setLoading] = useState(false);
@@ -76,7 +78,7 @@ export default function ProductDetail() {
       }
     };
     fetchBook();
-  }, [slug]);
+  }, [slug, shouldRefresh, lastUpdateTime]);
 
   const decQuantity = () => {
     if (quantity > 1) {
@@ -85,13 +87,26 @@ export default function ProductDetail() {
   };
 
   const incQuantity = () => {
-    setQuantity(parseInt(quantity + 1));
+    if (quantity < bookData.quantity) {
+      setQuantity(parseInt(quantity + 1));
+    } else {
+      toast.info(`Chỉ còn ${bookData.quantity} cuốn trong kho!`, {
+        autoClose: 2000,
+      });
+    }
   };
 
   const handleChange = (e) => {
     const newQuantity = parseInt(e.target.value);
     if (newQuantity) {
-      setQuantity(newQuantity);
+      if (newQuantity > bookData.quantity) {
+        toast.info(`Chỉ còn ${bookData.quantity} cuốn trong kho!`, {
+          autoClose: 2000,
+        });
+        setQuantity(bookData.quantity);
+      } else {
+        setQuantity(newQuantity);
+      }
     } else {
       setQuantity("");
     }
@@ -99,6 +114,14 @@ export default function ProductDetail() {
 
   const handleAddToCart = () => {
     if (currentUser && currentUser.userId) {
+      if (quantity > bookData.quantity) {
+        toast.error(`Chỉ còn ${bookData.quantity} cuốn trong kho!`, {
+          autoClose: 2000,
+        });
+        setQuantity(bookData.quantity);
+        return;
+      }
+
       const {
         _id: productId,
         name,
@@ -119,6 +142,14 @@ export default function ProductDetail() {
         slug,
         price: newPrice,
         totalPriceItem: newPrice * quantity,
+        product: {
+          _id: productId,
+          name,
+          imageUrl,
+          slug,
+          price: newPrice,
+          quantity: bookData.quantity
+        }
       });
       dispatch(action);
       toast.success("Thêm sản phẩm vào giỏ hàng thành công!", {
@@ -131,6 +162,14 @@ export default function ProductDetail() {
 
   const handleBuyNow = () => {
     if (currentUser && currentUser.userId) {
+      if (quantity > bookData.quantity) {
+        toast.error(`Chỉ còn ${bookData.quantity} cuốn trong kho!`, {
+          autoClose: 2000,
+        });
+        setQuantity(bookData.quantity);
+        return;
+      }
+
       const {
         _id: productId,
         name,
@@ -151,6 +190,14 @@ export default function ProductDetail() {
         slug,
         price: newPrice,
         totalPriceItem: newPrice * quantity,
+        product: {
+          _id: productId,
+          name,
+          imageUrl,
+          slug,
+          price: newPrice,
+          quantity: bookData.quantity
+        }
       });
       dispatch(action);
       navigate({ pathname: "/gio-hang" });
@@ -358,6 +405,13 @@ export default function ProductDetail() {
                             {g.name}
                           </Badge>
                         ))}
+                      </span>
+                    </div>
+
+                    <div className={styles.detailRow}>
+                      <span className={styles.detailLabel}>Số lượng:</span>
+                      <span className={styles.detailValue}>
+                        {bookData.quantity || 0} cuốn
                       </span>
                     </div>
                   </div>

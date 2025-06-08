@@ -3,6 +3,7 @@ const axios = require("axios");
 
 const orderService = require("../services/orders.service");
 const voucherService = require("../services/vouchers.service");
+const bookService = require("../services/books.service");
 
 const {
   paymentStatusEnum,
@@ -10,6 +11,9 @@ const {
   orderStatusEnum,
 } = require("../utils/enum");
 const { orderSuccess } = require("../utils/sendMail");
+
+console.log('\n=== ORDER CONTROLLER LOADED ===');
+console.log('Available order statuses:', Object.values(orderStatusEnum).map(s => s.text));
 
 const orderController = {
   getAll: async (req, res) => {
@@ -327,14 +331,78 @@ const orderController = {
         }
       }
 
+      // Cập nhật số lượng sản phẩm khi đơn hàng được giao thành công
+      if (data && data.orderStatus?.code === orderStatusEnum?.delivered?.code) {
+        console.log('\n');
+        console.log('📦📦📦 BẮT ĐẦU CẬP NHẬT SỐ LƯỢNG SẢN PHẨM 📦📦📦');
+        
+        // Cập nhật số lượng cho từng sản phẩm trong đơn hàng
+        const updatePromises = products.map(async (item) => {
+          try {
+            console.log('\n');
+            console.log('Sản phẩm:', item.product);
+            console.log('Số lượng mua:', item.quantity);
+
+            // Lấy thông tin sách từ database
+            const book = await bookService.getById(item.product);
+            if (!book) {
+              console.log('❌ Không tìm thấy sách');
+              return;
+            }
+
+            console.log('Tên sách:', book.name);
+            console.log('Số lượng hiện có:', book.quantity);
+
+            // Tính số lượng mới
+            const currentQuantity = Number(book.quantity) || 0;
+            const orderQuantity = Number(item.quantity) || 0;
+            const newQuantity = currentQuantity - orderQuantity;
+
+            console.log('Số lượng mới sẽ là:', newQuantity);
+
+            if (newQuantity < 0) {
+              console.log('❌ Số lượng mới không hợp lệ');
+              return;
+            }
+
+            // Cập nhật số lượng mới
+            const updatedBook = await bookService.updateQuantity(item.product, newQuantity);
+            if (!updatedBook) {
+              console.log('❌ Không thể cập nhật số lượng');
+              return;
+            }
+
+            console.log('✅ Cập nhật thành công!');
+            console.log('Số lượng cũ:', currentQuantity);
+            console.log('Số lượng mới:', updatedBook.book.quantity);
+
+          } catch (error) {
+            console.log('❌ Lỗi:', error.message);
+          }
+        });
+
+        // Đợi tất cả các cập nhật hoàn tất
+        await Promise.all(updatePromises);
+        
+        console.log('\n');
+        console.log('✅✅✅ CẬP NHẬT SỐ LƯỢNG HOÀN TẤT ✅✅✅');
+      }
+
+      if (data) {
+        await orderService.addTracking(data._id, {
+          status: data.orderStatus?.text,
+          time: new Date(),
+          userId,
+        });
+      }
+
       return res.status(201).json({
-        message: "success",
+        message: "Tạo đơn hàng thành công!",
         error: 0,
-        data,
+        data: data,
       });
     } catch (error) {
-      console.log("Lỗi chung khi tạo đơn hàng:", error);
-      res.status(500).json({
+      return res.status(500).json({
         message: `Có lỗi xảy ra! ${error.message}`,
         error: 1,
       });
@@ -359,6 +427,11 @@ const orderController = {
   },
   updateOrderStatus: async (req, res) => {
     try {
+      console.log('\n');
+      console.log('🚀🚀🚀 BẮT ĐẦU CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG 🚀🚀🚀');
+      console.log('ID đơn hàng:', req.params.id);
+      console.log('Trạng thái mới:', req.body.orderStatusCode);
+
       const { id } = req.params;
       const { orderStatusCode } = req.body;
       const {
@@ -366,11 +439,20 @@ const orderController = {
       } = req;
       const order = await orderService.getById(id);
 
+      console.log('Thông tin đơn hàng:', {
+        id: order._id,
+        trạng_thái_hiện_tại: order.orderStatus?.text,
+        trạng_thái_mới: orderStatusCode
+      });
+
       const {
         method,
         paymentStatus,
         orderStatus: { code: oldCode },
+        products,
       } = order;
+
+      console.log('Order products:', JSON.stringify(products, null, 2));
 
       if (
         method?.code !== methodEnum?.cash?.code &&
@@ -412,6 +494,64 @@ const orderController = {
         orderStatus,
         paymentStatus: newPaymentStatus,
       });
+
+      // Cập nhật số lượng sản phẩm khi đơn hàng được giao thành công
+      if (data && code === orderStatusEnum?.delivered?.code) {
+        console.log('\n');
+        console.log('📦📦📦 BẮT ĐẦU CẬP NHẬT SỐ LƯỢNG SẢN PHẨM 📦📦📦');
+        
+        // Cập nhật số lượng cho từng sản phẩm trong đơn hàng
+        const updatePromises = products.map(async (item) => {
+          try {
+            console.log('\n');
+            console.log('Sản phẩm:', item.product);
+            console.log('Số lượng mua:', item.quantity);
+
+            // Lấy thông tin sách từ database
+            const book = await bookService.getById(item.product);
+            if (!book) {
+              console.log('❌ Không tìm thấy sách');
+              return;
+            }
+
+            console.log('Tên sách:', book.name);
+            console.log('Số lượng hiện có:', book.quantity);
+
+            // Tính số lượng mới
+            const currentQuantity = Number(book.quantity) || 0;
+            const orderQuantity = Number(item.quantity) || 0;
+            const newQuantity = currentQuantity - orderQuantity;
+
+            console.log('Số lượng mới sẽ là:', newQuantity);
+
+            if (newQuantity < 0) {
+              console.log('❌ Số lượng mới không hợp lệ');
+              return;
+            }
+
+            // Cập nhật số lượng mới
+            const updatedBook = await bookService.updateQuantity(item.product, newQuantity);
+            if (!updatedBook) {
+              console.log('❌ Không thể cập nhật số lượng');
+              return;
+            }
+
+            console.log('✅ Cập nhật thành công!');
+            console.log('Số lượng cũ:', currentQuantity);
+            console.log('Số lượng mới:', updatedBook.book.quantity);
+
+          } catch (error) {
+            console.log('❌ Lỗi:', error.message);
+          }
+        });
+
+        // Đợi tất cả các cập nhật hoàn tất
+        await Promise.all(updatePromises);
+        
+        console.log('\n');
+        console.log('✅✅✅ CẬP NHẬT SỐ LƯỢNG HOÀN TẤT ✅✅✅');
+      }
+
       if (data) {
         await orderService.addTracking(id, {
           status: orderStatus?.text,
@@ -419,12 +559,14 @@ const orderController = {
           userId,
         });
       }
+
       res.status(200).json({
         message: "success",
         error: 0,
         data: data,
       });
     } catch (error) {
+      console.error('Lỗi khi cập nhật trạng thái đơn hàng:', error);
       res.status(500).json({
         message: `Có lỗi xảy ra! ${error.message}`,
         error: 1,
@@ -445,6 +587,116 @@ const orderController = {
       });
     } catch (error) {
       // ...error handling...
+    }
+  },
+  // Cập nhật số lượng sản phẩm
+  updateQuantity: async (product, quantity) => {
+    try {
+      console.log('\n📦📦📦 BẮT ĐẦU CẬP NHẬT SỐ LƯỢNG SẢN PHẨM 📦📦📦\n');
+      console.log('\nSản phẩm:', product);
+      console.log('Số lượng mua:', quantity);
+      console.log('Tên sách:', product.name);
+      console.log('Số lượng hiện có:', product.quantity);
+      
+      const newQuantity = product.quantity - quantity;
+      console.log('Số lượng mới sẽ là:', newQuantity);
+
+      // Cập nhật số lượng trong database
+      const result = await bookService.updateQuantity(product._id, newQuantity);
+      
+      if (!result) {
+        throw new Error('Không thể cập nhật số lượng sản phẩm');
+      }
+
+      console.log('✅ Cập nhật thành công!');
+      console.log('Số lượng cũ:', product.quantity);
+      console.log('Số lượng mới:', newQuantity);
+
+      // Cập nhật lại số lượng trong product object để đảm bảo tính nhất quán
+      product.quantity = newQuantity;
+
+      console.log('\n✅✅✅ CẬP NHẬT SỐ LƯỢNG HOÀN TẤT ✅✅✅\n');
+      return true;
+    } catch (error) {
+      console.error('❌ Lỗi khi cập nhật số lượng:', error);
+      throw error;
+    }
+  },
+  updateStatus: async(req, res) => {
+    try {
+      console.log('\n🚀🚀🚀 BẮT ĐẦU CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG 🚀🚀🚀');
+      const { id } = req.params;
+      const { status } = req.body;
+      
+      console.log('ID đơn hàng:', id);
+      console.log('Trạng thái mới:', status);
+      
+      const order = await orderService.getById(id);
+      if (!order) {
+        return res.status(404).json({
+          message: 'Không tìm thấy đơn hàng!',
+          error: 1
+        });
+      }
+
+      console.log('Thông tin đơn hàng:', {
+        id: order._id,
+        'trạng_thái_hiện_tại': order.status,
+        'trạng_thái_mới': status
+      });
+
+      // Nếu đơn hàng đã hoàn thành (status = 6), cập nhật số lượng sản phẩm
+      if (status === 6) {
+        console.log('\nOrder products:', JSON.stringify(order.products, null, 2));
+        
+        // Cập nhật số lượng sản phẩm
+        for (const item of order.products) {
+          const product = item.product;
+          const quantity = item.quantity;
+          
+          console.log('\nCập nhật số lượng sản phẩm:');
+          console.log('Tên sách:', product.name);
+          console.log('Số lượng hiện có:', product.quantity);
+          console.log('Số lượng mua:', quantity);
+          console.log('Số lượng mới sẽ là:', product.quantity - quantity);
+
+          // Cập nhật số lượng trong database
+          const result = await bookService.updateQuantity(product._id, product.quantity - quantity);
+          
+          if (!result) {
+            console.error('❌ Không thể cập nhật số lượng sản phẩm:', product.name);
+            continue;
+          }
+
+          console.log('✅ Cập nhật thành công!');
+          console.log('Số lượng cũ:', product.quantity);
+          console.log('Số lượng mới:', product.quantity - quantity);
+        }
+      }
+
+      // Cập nhật trạng thái đơn hàng
+      const updatedOrder = await orderService.updateStatus(id, status);
+      
+      if (!updatedOrder) {
+        return res.status(400).json({
+          message: 'Cập nhật trạng thái thất bại!',
+          error: 1
+        });
+      }
+
+      console.log('\n✅✅✅ CẬP NHẬT TRẠNG THÁI HOÀN TẤT ✅✅✅\n');
+      
+      res.status(200).json({
+        message: 'Cập nhật trạng thái thành công!',
+        error: 0,
+        data: updatedOrder
+      });
+    } catch (error) {
+      console.error('❌ Lỗi khi cập nhật trạng thái:', error);
+      res.status(500).json({
+        message: `Có lỗi xảy ra! ${error.message}`,
+        error: 1
+      });
     }
   },
 };
