@@ -584,3 +584,21 @@
     font-size: 0.85rem;
   }
 }
+
+.outOfStock {
+  color: #dc3545;
+  font-weight: 600;
+  margin-left: 10px;
+}
+
+.disabledBtn {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #6c757d !important;
+  border-color: #6c757d !important;
+}
+
+.disabledBtn:hover {
+  background-color: #6c757d !important;
+  border-color: #6c757d !important;
+}

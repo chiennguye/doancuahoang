@@ -69,6 +69,18 @@ function Cart() {
     if (!currentUser.userId) {
       e.preventDefault();
       alert("Bạn cần đăng nhập để thực hiện thanh toán!");
+      return;
+    }
+
+    // Kiểm tra số lượng sản phẩm trong kho
+    const invalidItems = cartData.list.filter(item => item.quantity > item.product.quantity);
+    if (invalidItems.length > 0) {
+      e.preventDefault();
+      const productNames = invalidItems.map(item => item.product.name).join(", ");
+      toast.error(`Số lượng sản phẩm ${productNames} trong giỏ hàng vượt quá số lượng có sẵn trong kho!`, {
+        autoClose: 3000
+      });
+      return;
     }
   };
 

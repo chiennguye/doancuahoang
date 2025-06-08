@@ -431,41 +431,47 @@ export default function ProductDetail() {
                   <div className={styles.purchaseSection}>
                     <div className={styles.quantitySection}>
                       <span className={styles.quantityLabel}>Số lượng:</span>
-                      <div className={styles.quantityControls}>
-                        <button
-                          className={styles.quantityBtn}
-                          onClick={decQuantity}
-                        >
-                          <AiOutlineMinus />
-                        </button>
-                        <input
-                          type="text"
-                          className={styles.quantityInput}
-                          value={quantity}
-                          onChange={handleChange}
-                        />
-                        <button
-                          className={styles.quantityBtn}
-                          onClick={incQuantity}
-                        >
-                          <AiOutlinePlus />
-                        </button>
-                      </div>
+                      {bookData.quantity > 0 ? (
+                        <div className={styles.quantityControls}>
+                          <button
+                            className={styles.quantityBtn}
+                            onClick={decQuantity}
+                          >
+                            <AiOutlineMinus />
+                          </button>
+                          <input
+                            type="text"
+                            className={styles.quantityInput}
+                            value={quantity}
+                            onChange={handleChange}
+                          />
+                          <button
+                            className={styles.quantityBtn}
+                            onClick={incQuantity}
+                          >
+                            <AiOutlinePlus />
+                          </button>
+                        </div>
+                      ) : (
+                        <span className={styles.outOfStock}>Hết hàng</span>
+                      )}
                     </div>
 
                     <div className={styles.actionButtons}>
                       <Button
-                        className={styles.addToCartBtn}
+                        className={`${styles.addToCartBtn} ${bookData.quantity === 0 ? styles.disabledBtn : ''}`}
                         onClick={handleAddToCart}
                         size="lg"
+                        disabled={bookData.quantity === 0}
                       >
                         <AiOutlineShoppingCart className={styles.btnIcon} />
                         Thêm vào giỏ hàng
                       </Button>
                       <Button
-                        className={styles.buyNowBtn}
+                        className={`${styles.buyNowBtn} ${bookData.quantity === 0 ? styles.disabledBtn : ''}`}
                         onClick={handleBuyNow}
                         size="lg"
+                        disabled={bookData.quantity === 0}
                       >
                         Mua ngay
                       </Button>
