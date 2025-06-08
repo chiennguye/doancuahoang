@@ -118,6 +118,42 @@ export default function OrderList() {
     }
   };
 
+  const handleCancelOrder = async () => {
+    try {
+      setLoadingUpdate(true);
+      const { data } = await orderApi.updateOrderStatus(orderDetail?._id, { 
+        orderStatusCode: 6 // Status code for cancelled
+      });
+      
+      const { orderStatus, paymentStatus } = data;
+      
+      // Cập nhật lại thông tin đơn hàng
+      setOrderDetail((pre) => ({
+        ...pre,
+        orderStatus,
+        paymentStatus
+      }));
+
+      // Cập nhật lại danh sách đơn hàng
+      setOrderData((pre) => ({
+        ...pre,
+        orders: pre.orders.map((item) => 
+          item?._id === orderDetail?._id
+            ? { ...item, orderStatus, paymentStatus }
+            : item
+        )
+      }));
+      
+      toast.success("Hủy đơn hàng thành công!");
+    } catch (error) {
+      console.error("Error cancelling order:", error);
+      toast.error("Có lỗi xảy ra khi hủy đơn hàng!");
+    } finally {
+      setLoadingUpdate(false);
+      setShowModalUpdate(false);
+    }
+  };
+
   return (
     <Row>
       <Modal
@@ -134,10 +170,19 @@ export default function OrderList() {
             <div>
               <p className="mb-4">Trạng thái đơn hàng: <b>{orderDetail?.orderStatus?.text}</b></p>
               <OrderProgress current={orderDetail?.orderStatus?.code} />
-              {orderDetail?.orderStatus?.code < steps?.length - 1 && (
-                <Button variant="success" disabled={loadingUpdate} className="mt-4 d-flex" style={{margin: "0 auto"}} onClick={handleUpdateStatus}>
-                  Chuyển sang trạng thái tiếp theo
-                </Button>
+              {orderDetail?.orderStatus?.code !== 6 && (
+                <div className="d-flex justify-content-center gap-3 mt-4">
+                  {orderDetail?.orderStatus?.code === 0 && (
+                    <Button variant="danger" disabled={loadingUpdate} onClick={handleCancelOrder}>
+                      Hủy đơn hàng
+                    </Button>
+                  )}
+                  {orderDetail?.orderStatus?.code < steps.length - 2 && (
+                    <Button variant="success" disabled={loadingUpdate} onClick={handleUpdateStatus}>
+                      Chuyển sang trạng thái tiếp theo
+                    </Button>
+                  )}
+                </div>
               )}
             </div>
           )}
@@ -202,14 +247,15 @@ export default function OrderList() {
                         <td className="price fw-bold">
                           {format.formatPrice(item?.cost?.total)}
                         </td>
-                        <td><span className="badge" style={{backgroundColor: steps[item?.orderStatus?.code]?.color}}>{item?.orderStatus?.text}</span></td>
+                        <td><span className="badge" style={{backgroundColor: (item?.orderStatus?.text === "Đã hủy" || item?.orderStatus?.code === 6) ? "#dc3545" : steps[item?.orderStatus?.code]?.color}}>{item?.orderStatus?.text}</span></td>
                         <td>
                           <button
                             className="btn btn-success"
                             onClick={() => handleUpdateOrder(item?._id)}
                             disabled={
-                              item?.method?.code !== 0 &&
-                              item?.paymentStatus?.code !== 2
+                              (item?.method?.code !== 0 &&
+                              item?.paymentStatus?.code !== 2) ||
+                              item?.orderStatus?.code === 6 // Block nếu đã hủy
                             }
                           >
                             <FaEdit />

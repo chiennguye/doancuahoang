@@ -10,6 +10,7 @@ import {
   Card,
   InputGroup,
 } from "react-bootstrap";
+import { toast } from "react-toastify";
 
 import {
   FaEye,
@@ -48,6 +49,7 @@ export default function Order() {
 
   const [loading, setLoading] = useState(false);
   const [loadingCheckout, setLoadingCheckout] = useState(false);
+  const [loadingCancel, setLoadingCancel] = useState(false);
 
   const [selectedOrder, setSelectedOrder] = useState({});
   const [selectedMethod, setSelectedMethod] = useState(1);
@@ -117,16 +119,67 @@ export default function Order() {
     }
   };
 
+  const handleCancelOrder = async (orderId) => {
+    try {
+      setLoadingCancel(true);
+      await orderApi.cancelOrder(orderId);
+      
+      // Cập nhật lại danh sách đơn hàng
+      setOrderData((pre) => ({
+        ...pre,
+        orders: pre.orders.map((item) => 
+          item?._id === orderId
+            ? { 
+                ...item, 
+                orderStatus: { code: 6, text: "Đơn hàng đã hủy" }
+              }
+            : item
+        )
+      }));
+      
+      toast.success("Hủy đơn hàng thành công!");
+    } catch (error) {
+      console.error("Error canceling order:", error);
+      toast.error("Có lỗi xảy ra khi hủy đơn hàng!");
+    } finally {
+      setLoadingCancel(false);
+    }
+  };
+
   const getOrderStats = () => {
-    const orders = orderData?.orders || [];
-    const total = orders.length;
-    const completed = orders.filter(
-      (order) => order.orderStatus?.code === 3
-    ).length;
-    const pending = orders.filter(
-      (order) => order.orderStatus?.code <= 2
-    ).length;
-    return { total, completed, pending };
+    if (!orderData.orders) return [];
+    return [
+      {
+        title: "Tất cả",
+        count: orderData.orders.length,
+        icon: <AiOutlineShoppingCart />,
+        color: "#4e73df",
+      },
+      {
+        title: "Chờ xác nhận",
+        count: orderData.orders.filter(
+          (item) => item?.orderStatus?.code === 0
+        ).length,
+        icon: <FaClock />,
+        color: "#f6c23e",
+      },
+      {
+        title: "Đã xác nhận",
+        count: orderData.orders.filter(
+          (item) => item?.orderStatus?.code === 1
+        ).length,
+        icon: <FaCheckCircle />,
+        color: "#1cc88a",
+      },
+      {
+        title: "Đã hủy",
+        count: orderData.orders.filter(
+          (item) => item?.orderStatus?.code === 6
+        ).length,
+        icon: <FaTimesCircle />,
+        color: "#e74a3b",
+      },
+    ];
   };
 
   const stats = getOrderStats();
@@ -137,51 +190,23 @@ export default function Order() {
       {orderData?.orders && orderData.orders.length > 0 && (
         <div className={styles.orderStats}>
           <Row className="g-3">
-            <Col md={4}>
-              <Card className={styles.statCard}>
-                <Card.Body>
-                  <div className={styles.statContent}>
-                    <div className={styles.statIcon}>
-                      <AiOutlineShoppingCart />
+            {stats.map((stat, index) => (
+              <Col key={index} lg={3} md={6} sm={12}>
+                <Card className={styles.statCard}>
+                  <Card.Body>
+                    <div className={styles.statContent}>
+                      <div className={styles.statIcon} style={{ backgroundColor: stat.color }}>
+                        {stat.icon}
+                      </div>
+                      <div className={styles.statInfo}>
+                        <h6 className={styles.statTitle}>{stat.title}</h6>
+                        <h3 className={styles.statCount}>{stat.count}</h3>
+                      </div>
                     </div>
-                    <div className={styles.statInfo}>
-                      <h4>{stats.total}</h4>
-                      <p>Tổng đơn hàng</p>
-                    </div>
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col md={4}>
-              <Card className={styles.statCard}>
-                <Card.Body>
-                  <div className={styles.statContent}>
-                    <div className={`${styles.statIcon} ${styles.successIcon}`}>
-                      <FaCheckCircle />
-                    </div>
-                    <div className={styles.statInfo}>
-                      <h4>{stats.completed}</h4>
-                      <p>Đã hoàn thành</p>
-                    </div>
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col md={4}>
-              <Card className={styles.statCard}>
-                <Card.Body>
-                  <div className={styles.statContent}>
-                    <div className={`${styles.statIcon} ${styles.pendingIcon}`}>
-                      <FaClock />
-                    </div>
-                    <div className={styles.statInfo}>
-                      <h4>{stats.pending}</h4>
-                      <p>Đang xử lý</p>
-                    </div>
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
+                  </Card.Body>
+                </Card>
+              </Col>
+            ))}
           </Row>
         </div>
       )}
@@ -196,7 +221,12 @@ export default function Order() {
         ) : orderData?.orders && orderData?.orders?.length > 0 ? (
           <div className={styles.ordersList}>
             {orderData.orders.map((item, index) => (
-              <Card key={item._id} className={styles.orderCard}>
+              <Card
+                className={`${styles.orderCard} ${
+                  item?.orderStatus?.code === 6 ? styles.cancelledOrder : ""
+                }`}
+                key={item._id}
+              >
                 <Card.Body>
                   <div className={styles.orderHeader}>
                     <div className={styles.orderNumber}>
@@ -333,6 +363,27 @@ export default function Order() {
                                   Thanh toán
                                 </Button>
                               )}
+                            {item?.orderStatus?.code < 2 && (
+                              <Button
+                                variant="danger"
+                                size="sm"
+                                onClick={() => handleCancelOrder(item?._id)}
+                                disabled={loadingCancel}
+                                className={styles.cancelBtn}
+                              >
+                                {loadingCancel ? (
+                                  <>
+                                    <Spinner animation="border" size="sm" className="me-2" />
+                                    Đang xử lý...
+                                  </>
+                                ) : (
+                                  <>
+                                    <FaTimesCircle className={styles.btnIcon} />
+                                    Hủy đơn
+                                  </>
+                                )}
+                              </Button>
+                            )}
                           </div>
                         </div>
                       </div>

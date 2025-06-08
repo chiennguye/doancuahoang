@@ -8,12 +8,12 @@ const { RoleEnum } = require('../utils/enum')
 router.get('/', verifyToken, checkRole([RoleEnum.Staff, RoleEnum.Admin]), orderController.getAll)
 router.get('/:id', verifyToken, checkRole([RoleEnum.Staff, RoleEnum.Admin]), orderController.getById)
 
-router.post("/thanhtoan/momo/verify", orderController.verifyMoMo)
-router.post('/thanhtoan/momo', orderController.getPayUrlMoMo)
-router.post('/', orderController.create)
+router.post('/', verifyToken, orderController.create)
+router.post('/thanhtoan/momo', verifyToken, orderController.getPayUrlMoMo)
+router.post('/thanhtoan/momo/verify', verifyToken, orderController.verifyMoMo)
 
-router.put('/:id/order-status', verifyToken, checkRole([RoleEnum.Staff, RoleEnum.Admin]), orderController.updateOrderStatus)
 router.put('/:id/paymentid', verifyToken, orderController.updatePaymentId)
-// router.delete('/:id', orderController.deleteById)
+router.put('/:id/order-status', verifyToken, checkRole([RoleEnum.Staff, RoleEnum.Admin]), orderController.updateOrderStatus)
+router.put('/:id/cancel', verifyToken, orderController.cancelOrder)
 
 module.exports = router;

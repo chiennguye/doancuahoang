@@ -43,8 +43,11 @@ const orderStatusEnum = {
     delivered: {
         code: 5,
         text: "Giao hàng thành công"
-
     },
+    cancelled: {
+        code: 6,
+        text: "Đơn hàng đã hủy"
+    }
 }
 
 const paymentStatusEnum = {

@@ -699,6 +699,49 @@ const orderController = {
       });
     }
   },
+  cancelOrder: async (req, res) => {
+    try {
+      console.log('\n🚀🚀🚀 BẮT ĐẦU HỦY ĐƠN HÀNG 🚀🚀🚀');
+      const { id } = req.params;
+      
+      console.log('ID đơn hàng:', id);
+      
+      const order = await orderService.getById(id);
+      if (!order) {
+        return res.status(404).json({
+          message: 'Không tìm thấy đơn hàng!',
+          error: 1
+        });
+      }
+
+      // Kiểm tra trạng thái đơn hàng
+      if (order.orderStatus.code >= 2) {
+        return res.status(400).json({
+          message: 'Không thể hủy đơn hàng đã được xác nhận!',
+          error: 1
+        });
+      }
+
+      // Cập nhật trạng thái đơn hàng thành đã hủy
+      const data = await orderService.updateStatus(id, {
+        orderStatus: orderStatusEnum.cancelled,
+        paymentStatus: order.paymentStatus
+      });
+
+      console.log('✅ Hủy đơn hàng thành công!');
+      
+      return res.json({
+        message: 'Hủy đơn hàng thành công!',
+        data
+      });
+    } catch (error) {
+      console.error('❌ Lỗi khi hủy đơn hàng:', error);
+      return res.status(500).json({
+        message: 'Có lỗi xảy ra khi hủy đơn hàng!',
+        error: 1
+      });
+    }
+  },
 };
 
 module.exports = orderController;

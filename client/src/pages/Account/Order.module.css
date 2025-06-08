@@ -47,21 +47,18 @@
 .statContent {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 10px 0;
+  gap: 1rem;
 }
 
 .statIcon {
-  width: 60px;
-  height: 60px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  background: var(--gradient-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
   color: white;
-  flex-shrink: 0;
+  font-size: 1.5rem;
 }
 
 .statIcon.successIcon {
@@ -72,17 +69,21 @@
   background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
 }
 
-.statInfo h4 {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0;
+.statInfo {
+  flex: 1;
 }
 
-.statInfo p {
+.statTitle {
   color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.statCount {
+  color: var(--text-primary);
   margin: 0;
-  font-weight: 500;
+  font-size: 1.5rem;
+  font-weight: 600;
 }
 
 /* Orders Section */
@@ -113,12 +114,9 @@
 }
 
 .orderCard {
-  border: none;
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-light);
-  transition: var(--transition);
-  overflow: hidden;
-  position: relative;
+  margin-bottom: 1rem;
+  border: 1px solid #e0e0e0;
+  transition: all 0.3s ease;
 }
 
 .orderCard .card-body {
@@ -836,4 +834,17 @@
   .methodLabel {
     padding: 12px;
   }
+}
+
+.cancelledOrder {
+  background-color: #fff5f5;
+  border-color: #ffcdd2;
+}
+
+.cancelledOrder .orderHeader {
+  border-bottom-color: #ffcdd2;
+}
+
+.cancelledOrder .orderSection {
+  border-color: #ffcdd2;
 }
