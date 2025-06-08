@@ -11,10 +11,8 @@ const bookController = {
             const { query } = req.query
 
             const queryObj = !!query ? query : {}
-            console.log('📚 Getting books with query:', queryObj);
 
             const [count, data] = await bookService.getAll({query: queryObj, page, limit, sort})
-            console.log('📚 Books from database:', data.map(b => ({ id: b._id, name: b.name, quantity: b.quantity })));
 
             const totalPage = Math.ceil(count / limit)
             
@@ -30,7 +28,6 @@ const bookController = {
                 }
             })
         } catch (error) {
-            console.error('❌ Error in getAll:', error);
             res.status(500).json({
                 message: `Có lỗi xảy ra! ${error.message}`,
                 error: 1,
@@ -173,12 +170,10 @@ const bookController = {
     },
     create: async(req, res) => {
         try {
-            console.log('Request body khi tạo sách mới:', req.body);
             const { bookId } = req.body
             const isExist = await bookService.getByBookId(bookId)
             if (isExist) return res.status(400).json({message: "bookId đã tồn tại!", error: 1}) 
             const data = await bookService.create(req.body)
-            console.log('Dữ liệu sách sau khi tạo:', data);
 
             return res.status(201).json({
                 message: 'success',
@@ -186,7 +181,6 @@ const bookController = {
                 data
             })
         } catch (error) {
-            console.error('Lỗi khi tạo sách:', error);
             res.status(400).json({
                 message: `Có lỗi xảy ra! ${error.message}`,
                 error: 1,

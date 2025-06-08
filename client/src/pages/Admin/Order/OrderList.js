@@ -177,7 +177,7 @@ export default function OrderList() {
                       Hủy đơn hàng
                     </Button>
                   )}
-                  {orderDetail?.orderStatus?.code < steps.length - 2 && (
+                  {orderDetail?.orderStatus?.code < steps.length - 1 && (
                     <Button variant="success" disabled={loadingUpdate} onClick={handleUpdateStatus}>
                       Chuyển sang trạng thái tiếp theo
                     </Button>

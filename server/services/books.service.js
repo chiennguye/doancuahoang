@@ -6,12 +6,10 @@ const redis = require('../config/redis');
 const bookService = {
     getAll: async({query, page, limit, sort}) => {
         const skip = (page - 1) * limit
-        console.log('Getting books with query:', query);
         const [count, books] = await Promise.all([
             Book.countDocuments(query), 
             Book.find(query).populate('genre author publisher').skip(skip).limit(limit).sort(sort)
         ]);
-        console.log('Books from database:', books.map(b => ({ id: b._id, name: b.name, quantity: b.quantity })));
         return [count, books];
     },
     getByBookId: async(bookId) => {
@@ -112,9 +110,6 @@ const bookService = {
     },
     updateQuantity: async(id, newQuantity) => {
         try {
-            console.log('📦 Updating book quantity:', { id, newQuantity });
-            
-            // Use findOneAndUpdate to ensure atomic operation
             const updatedBook = await Book.findOneAndUpdate(
                 { _id: id },
                 { $set: { quantity: newQuantity } },
@@ -122,23 +117,14 @@ const bookService = {
             ).populate('genre author publisher');
 
             if (!updatedBook) {
-                console.log('❌ Book not found:', id);
                 return null;
             }
-
-            console.log('✅ Book updated successfully:', {
-                id: updatedBook._id,
-                name: updatedBook.name,
-                oldQuantity: updatedBook.quantity,
-                newQuantity
-            });
 
             return {
                 book: updatedBook,
                 message: 'Cập nhật số lượng thành công'
             };
         } catch (error) {
-            console.error('❌ Error updating book quantity:', error);
             throw error;
         }
     }

@@ -48,21 +48,6 @@ const orderService = {
     getTotalRevenue: async() => {
         // Đầu tiên, lấy tất cả đơn hàng để kiểm tra
         const allOrders = await Order.find({});
-        console.log('\n=== TẤT CẢ ĐƠN HÀNG ===');
-        allOrders.forEach(order => {
-            console.log({
-                orderId: order._id,
-                status: order.orderStatus?.text,
-                statusCode: order.orderStatus?.code,
-                paymentMethod: order.method?.text,
-                paymentMethodCode: order.method?.code,
-                paymentStatus: order.paymentStatus?.text,
-                paymentStatusCode: order.paymentStatus?.code,
-                total: order.cost?.total,
-                shippingFee: order.cost?.shippingFee
-            });
-        });
-
         const result = await Order.aggregate([
             {
                 $match: {
@@ -98,23 +83,6 @@ const orderService = {
                 },
             },
         ]);
-
-        // Log chi tiết các đơn hàng được tính vào doanh thu
-        if (result && result.length > 0) {
-            console.log('\n=== CÁC ĐƠN HÀNG ĐƯỢC TÍNH VÀO DOANH THU ===');
-            result[0].orders.forEach(order => {
-                console.log({
-                    orderId: order.orderId,
-                    status: order.status,
-                    paymentMethod: order.paymentMethod,
-                    paymentStatus: order.paymentStatus,
-                    totalCost: order.totalCost
-                });
-            });
-            console.log('\nTổng doanh thu:', result[0].revenue);
-        } else {
-            console.log('\nKhông có đơn hàng nào được tính vào doanh thu');
-        }
 
         return result;
     },

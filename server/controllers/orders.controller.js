@@ -12,9 +12,6 @@ const {
 } = require("../utils/enum");
 const { orderSuccess } = require("../utils/sendMail");
 
-console.log('\n=== ORDER CONTROLLER LOADED ===');
-console.log('Available order statuses:', Object.values(orderStatusEnum).map(s => s.text));
-
 const orderController = {
   getAll: async (req, res) => {
     try {
@@ -151,7 +148,7 @@ const orderController = {
         )
         .catch((err) => res.status(500).json({ message: err.message }));
     } catch (error) {
-      console.log(error);
+      console.error(error);
       res.status(500).json({
         error: 1,
         message: error.message,
@@ -219,7 +216,7 @@ const orderController = {
           // res.status(500).json({ error: err.message })
         });
     } catch (error) {
-      console.log(error);
+      console.error(error);
       res.status(500).json({
         message: `Có lỗi xảy ra! ${error.message}`,
         error: 1,
@@ -231,7 +228,6 @@ const orderController = {
       const { userId, products, delivery, voucherId, cost, method, paymentId } =
         req.body;
 
-      // Kiểm tra dữ liệu đầu vào
       if (!userId) {
         return res.status(400).json({
           error: 1,
@@ -266,7 +262,6 @@ const orderController = {
         });
       }
 
-      // Kiểm tra voucher nếu có
       try {
         if (voucherId) {
           const voucher = await voucherService.getById(voucherId);
@@ -288,14 +283,13 @@ const orderController = {
           }
         }
       } catch (voucherError) {
-        console.log("Lỗi khi kiểm tra voucher:", voucherError);
+        console.error("Lỗi khi kiểm tra voucher:", voucherError);
         return res.status(400).json({
           message: `Lỗi xử lý voucher: ${voucherError.message}`,
           error: 1,
         });
       }
 
-      // Tạo đơn hàng
       let data;
       try {
         data = await orderService.create({
@@ -308,14 +302,13 @@ const orderController = {
           paymentId: paymentId || null,
         });
       } catch (createError) {
-        console.log("Lỗi khi tạo đơn hàng:", createError);
+        console.error("Lỗi khi tạo đơn hàng:", createError);
         return res.status(500).json({
           message: `Lỗi khi tạo đơn hàng: ${createError.message}`,
           error: 1,
         });
       }
 
-      // Gửi email xác nhận
       if (data) {
         try {
           await orderSuccess({
@@ -326,66 +319,37 @@ const orderController = {
             cost,
           });
         } catch (emailError) {
-          console.log("Lỗi khi gửi email xác nhận:", emailError);
-          // Không return ở đây, vẫn trả về thông tin đơn hàng đã tạo
+          console.error("Lỗi khi gửi email xác nhận:", emailError);
         }
       }
 
-      // Cập nhật số lượng sản phẩm khi đơn hàng được giao thành công
       if (data && data.orderStatus?.code === orderStatusEnum?.delivered?.code) {
-        console.log('\n');
-        console.log('📦📦📦 BẮT ĐẦU CẬP NHẬT SỐ LƯỢNG SẢN PHẨM 📦📦📦');
-        
-        // Cập nhật số lượng cho từng sản phẩm trong đơn hàng
         const updatePromises = products.map(async (item) => {
           try {
-            console.log('\n');
-            console.log('Sản phẩm:', item.product);
-            console.log('Số lượng mua:', item.quantity);
-
-            // Lấy thông tin sách từ database
             const book = await bookService.getById(item.product);
             if (!book) {
-              console.log('❌ Không tìm thấy sách');
               return;
             }
 
-            console.log('Tên sách:', book.name);
-            console.log('Số lượng hiện có:', book.quantity);
-
-            // Tính số lượng mới
             const currentQuantity = Number(book.quantity) || 0;
             const orderQuantity = Number(item.quantity) || 0;
             const newQuantity = currentQuantity - orderQuantity;
 
-            console.log('Số lượng mới sẽ là:', newQuantity);
-
             if (newQuantity < 0) {
-              console.log('❌ Số lượng mới không hợp lệ');
               return;
             }
 
-            // Cập nhật số lượng mới
             const updatedBook = await bookService.updateQuantity(item.product, newQuantity);
             if (!updatedBook) {
-              console.log('❌ Không thể cập nhật số lượng');
               return;
             }
 
-            console.log('✅ Cập nhật thành công!');
-            console.log('Số lượng cũ:', currentQuantity);
-            console.log('Số lượng mới:', updatedBook.book.quantity);
-
           } catch (error) {
-            console.log('❌ Lỗi:', error.message);
+            console.error('Lỗi khi cập nhật số lượng:', error);
           }
         });
 
-        // Đợi tất cả các cập nhật hoàn tất
         await Promise.all(updatePromises);
-        
-        console.log('\n');
-        console.log('✅✅✅ CẬP NHẬT SỐ LƯỢNG HOÀN TẤT ✅✅✅');
       }
 
       if (data) {
@@ -427,11 +391,6 @@ const orderController = {
   },
   updateOrderStatus: async (req, res) => {
     try {
-      console.log('\n');
-      console.log('🚀🚀🚀 BẮT ĐẦU CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG 🚀🚀🚀');
-      console.log('ID đơn hàng:', req.params.id);
-      console.log('Trạng thái mới:', req.body.orderStatusCode);
-
       const { id } = req.params;
       const { orderStatusCode } = req.body;
       const {
@@ -439,20 +398,12 @@ const orderController = {
       } = req;
       const order = await orderService.getById(id);
 
-      console.log('Thông tin đơn hàng:', {
-        id: order._id,
-        trạng_thái_hiện_tại: order.orderStatus?.text,
-        trạng_thái_mới: orderStatusCode
-      });
-
       const {
         method,
         paymentStatus,
         orderStatus: { code: oldCode },
         products,
       } = order;
-
-      console.log('Order products:', JSON.stringify(products, null, 2));
 
       if (
         method?.code !== methodEnum?.cash?.code &&
@@ -495,61 +446,33 @@ const orderController = {
         paymentStatus: newPaymentStatus,
       });
 
-      // Cập nhật số lượng sản phẩm khi đơn hàng được giao thành công
       if (data && code === orderStatusEnum?.delivered?.code) {
-        console.log('\n');
-        console.log('📦📦📦 BẮT ĐẦU CẬP NHẬT SỐ LƯỢNG SẢN PHẨM 📦📦📦');
-        
-        // Cập nhật số lượng cho từng sản phẩm trong đơn hàng
         const updatePromises = products.map(async (item) => {
           try {
-            console.log('\n');
-            console.log('Sản phẩm:', item.product);
-            console.log('Số lượng mua:', item.quantity);
-
-            // Lấy thông tin sách từ database
             const book = await bookService.getById(item.product);
             if (!book) {
-              console.log('❌ Không tìm thấy sách');
               return;
             }
 
-            console.log('Tên sách:', book.name);
-            console.log('Số lượng hiện có:', book.quantity);
-
-            // Tính số lượng mới
             const currentQuantity = Number(book.quantity) || 0;
             const orderQuantity = Number(item.quantity) || 0;
             const newQuantity = currentQuantity - orderQuantity;
 
-            console.log('Số lượng mới sẽ là:', newQuantity);
-
             if (newQuantity < 0) {
-              console.log('❌ Số lượng mới không hợp lệ');
               return;
             }
 
-            // Cập nhật số lượng mới
             const updatedBook = await bookService.updateQuantity(item.product, newQuantity);
             if (!updatedBook) {
-              console.log('❌ Không thể cập nhật số lượng');
               return;
             }
 
-            console.log('✅ Cập nhật thành công!');
-            console.log('Số lượng cũ:', currentQuantity);
-            console.log('Số lượng mới:', updatedBook.book.quantity);
-
           } catch (error) {
-            console.log('❌ Lỗi:', error.message);
+            console.error('Lỗi khi cập nhật số lượng:', error);
           }
         });
 
-        // Đợi tất cả các cập nhật hoàn tất
         await Promise.all(updatePromises);
-        
-        console.log('\n');
-        console.log('✅✅✅ CẬP NHẬT SỐ LƯỢNG HOÀN TẤT ✅✅✅');
       }
 
       if (data) {
@@ -575,61 +498,38 @@ const orderController = {
   },
   createOrder: async (req, res) => {
     try {
-      // ...existing order creation code...
-
-      // Replace email sending with console log
-      console.log("Order confirmation would have been sent to:", email);
-
       res.status(201).json({
         message: "Đặt hàng thành công",
         error: 0,
         data: result,
       });
     } catch (error) {
-      // ...error handling...
+      res.status(500).json({
+        message: `Có lỗi xảy ra! ${error.message}`,
+        error: 1,
+      });
     }
   },
-  // Cập nhật số lượng sản phẩm
   updateQuantity: async (product, quantity) => {
     try {
-      console.log('\n📦📦📦 BẮT ĐẦU CẬP NHẬT SỐ LƯỢNG SẢN PHẨM 📦📦📦\n');
-      console.log('\nSản phẩm:', product);
-      console.log('Số lượng mua:', quantity);
-      console.log('Tên sách:', product.name);
-      console.log('Số lượng hiện có:', product.quantity);
-      
       const newQuantity = product.quantity - quantity;
-      console.log('Số lượng mới sẽ là:', newQuantity);
-
-      // Cập nhật số lượng trong database
       const result = await bookService.updateQuantity(product._id, newQuantity);
       
       if (!result) {
         throw new Error('Không thể cập nhật số lượng sản phẩm');
       }
 
-      console.log('✅ Cập nhật thành công!');
-      console.log('Số lượng cũ:', product.quantity);
-      console.log('Số lượng mới:', newQuantity);
-
-      // Cập nhật lại số lượng trong product object để đảm bảo tính nhất quán
       product.quantity = newQuantity;
-
-      console.log('\n✅✅✅ CẬP NHẬT SỐ LƯỢNG HOÀN TẤT ✅✅✅\n');
       return true;
     } catch (error) {
-      console.error('❌ Lỗi khi cập nhật số lượng:', error);
+      console.error('Lỗi khi cập nhật số lượng:', error);
       throw error;
     }
   },
   updateStatus: async(req, res) => {
     try {
-      console.log('\n🚀🚀🚀 BẮT ĐẦU CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG 🚀🚀🚀');
       const { id } = req.params;
       const { status } = req.body;
-      
-      console.log('ID đơn hàng:', id);
-      console.log('Trạng thái mới:', status);
       
       const order = await orderService.getById(id);
       if (!order) {
@@ -639,42 +539,20 @@ const orderController = {
         });
       }
 
-      console.log('Thông tin đơn hàng:', {
-        id: order._id,
-        'trạng_thái_hiện_tại': order.status,
-        'trạng_thái_mới': status
-      });
-
-      // Nếu đơn hàng đã hoàn thành (status = 6), cập nhật số lượng sản phẩm
       if (status === 6) {
-        console.log('\nOrder products:', JSON.stringify(order.products, null, 2));
-        
-        // Cập nhật số lượng sản phẩm
         for (const item of order.products) {
           const product = item.product;
           const quantity = item.quantity;
           
-          console.log('\nCập nhật số lượng sản phẩm:');
-          console.log('Tên sách:', product.name);
-          console.log('Số lượng hiện có:', product.quantity);
-          console.log('Số lượng mua:', quantity);
-          console.log('Số lượng mới sẽ là:', product.quantity - quantity);
-
-          // Cập nhật số lượng trong database
           const result = await bookService.updateQuantity(product._id, product.quantity - quantity);
           
           if (!result) {
-            console.error('❌ Không thể cập nhật số lượng sản phẩm:', product.name);
+            console.error('Không thể cập nhật số lượng sản phẩm:', product.name);
             continue;
           }
-
-          console.log('✅ Cập nhật thành công!');
-          console.log('Số lượng cũ:', product.quantity);
-          console.log('Số lượng mới:', product.quantity - quantity);
         }
       }
 
-      // Cập nhật trạng thái đơn hàng
       const updatedOrder = await orderService.updateStatus(id, status);
       
       if (!updatedOrder) {
@@ -683,8 +561,6 @@ const orderController = {
           error: 1
         });
       }
-
-      console.log('\n✅✅✅ CẬP NHẬT TRẠNG THÁI HOÀN TẤT ✅✅✅\n');
       
       res.status(200).json({
         message: 'Cập nhật trạng thái thành công!',
@@ -692,7 +568,7 @@ const orderController = {
         data: updatedOrder
       });
     } catch (error) {
-      console.error('❌ Lỗi khi cập nhật trạng thái:', error);
+      console.error('Lỗi khi cập nhật trạng thái:', error);
       res.status(500).json({
         message: `Có lỗi xảy ra! ${error.message}`,
         error: 1
@@ -701,10 +577,7 @@ const orderController = {
   },
   cancelOrder: async (req, res) => {
     try {
-      console.log('\n🚀🚀🚀 BẮT ĐẦU HỦY ĐƠN HÀNG 🚀🚀🚀');
       const { id } = req.params;
-      
-      console.log('ID đơn hàng:', id);
       
       const order = await orderService.getById(id);
       if (!order) {
@@ -714,7 +587,6 @@ const orderController = {
         });
       }
 
-      // Kiểm tra trạng thái đơn hàng
       if (order.orderStatus.code >= 2) {
         return res.status(400).json({
           message: 'Không thể hủy đơn hàng đã được xác nhận!',
@@ -722,20 +594,17 @@ const orderController = {
         });
       }
 
-      // Cập nhật trạng thái đơn hàng thành đã hủy
       const data = await orderService.updateStatus(id, {
         orderStatus: orderStatusEnum.cancelled,
         paymentStatus: order.paymentStatus
       });
-
-      console.log('✅ Hủy đơn hàng thành công!');
       
       return res.json({
         message: 'Hủy đơn hàng thành công!',
         data
       });
     } catch (error) {
-      console.error('❌ Lỗi khi hủy đơn hàng:', error);
+      console.error('Lỗi khi hủy đơn hàng:', error);
       return res.status(500).json({
         message: 'Có lỗi xảy ra khi hủy đơn hàng!',
         error: 1
