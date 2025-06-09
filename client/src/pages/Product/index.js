@@ -42,6 +42,7 @@ export default function Product() {
           query,
           sort: {
             [sortArr[0]]: parseInt(sortArr[1]),
+            _id: -1
           },
         });
         setBookData({ books: data, totalPage: pagination.totalPage });

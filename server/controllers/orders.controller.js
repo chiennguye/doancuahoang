@@ -49,6 +49,26 @@ const orderController = {
       });
     }
   },
+  getOrderStats: async (req, res) => {
+    try {
+      const userId = req.query.userId;
+      let query = {};
+      if (userId) query.user = { $in: userId };
+
+      const stats = await orderService.getOrderStats(query);
+      
+      res.status(200).json({
+        message: "success",
+        error: 0,
+        data: stats
+      });
+    } catch (error) {
+      res.status(500).json({
+        message: `Có lỗi xảy ra! ${error.message}`,
+        error: 1,
+      });
+    }
+  },
   getById: async (req, res) => {
     try {
       const { id } = req.params;

@@ -46,6 +46,12 @@ export default function Order() {
   const [orderData, setOrderData] = useState([]);
   const [orderDetail, setOrderDetail] = useState({});
   const [page, setPage] = useState(1);
+  const [orderStats, setOrderStats] = useState({
+    total: 0,
+    pending: 0,
+    completed: 0,
+    cancelled: 0
+  });
 
   const [loading, setLoading] = useState(false);
   const [loadingCheckout, setLoadingCheckout] = useState(false);
@@ -77,8 +83,19 @@ export default function Order() {
         console.log(error);
       }
     };
+
+    const fetchOrderStats = async () => {
+      try {
+        const { data } = await orderApi.getOrderStats(userId);
+        setOrderStats(data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
     if (userId) {
       fetchOrder();
+      fetchOrderStats();
     }
   }, [userId, page]);
 
@@ -147,35 +164,28 @@ export default function Order() {
   };
 
   const getOrderStats = () => {
-    if (!orderData.orders) return [];
     return [
       {
         title: "Tất cả",
-        count: orderData.orders.length,
+        count: orderStats.total,
         icon: <AiOutlineShoppingCart />,
         color: "#4e73df",
       },
       {
         title: "Chờ xác nhận",
-        count: orderData.orders.filter(
-          (item) => item?.orderStatus?.code === 0
-        ).length,
+        count: orderStats.pending,
         icon: <FaClock />,
         color: "#f6c23e",
       },
       {
-        title: "Đã xác nhận",
-        count: orderData.orders.filter(
-          (item) => item?.orderStatus?.code === 1
-        ).length,
+        title: "Giao thành công",
+        count: orderStats.completed,
         icon: <FaCheckCircle />,
         color: "#1cc88a",
       },
       {
         title: "Đã hủy",
-        count: orderData.orders.filter(
-          (item) => item?.orderStatus?.code === 6
-        ).length,
+        count: orderStats.cancelled,
         icon: <FaTimesCircle />,
         color: "#e74a3b",
       },

@@ -551,6 +551,10 @@
   .loadingText {
     font-size: 0.9rem;
   }
+
+  .imageContainer {
+    height: 180px;
+  }
 }
 
 /* Accessibility */
@@ -559,5 +563,25 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+.productsGrid {
+  /* Add any specific grid styles if needed, currently empty in Product.module.css */
+}
+
+.productWrapper {
+  animation: fadeInUp 0.5s ease-out forwards;
+  height: 100%;
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

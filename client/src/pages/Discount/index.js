@@ -40,6 +40,7 @@ export default function Discount() {
         setLoading(false);
         setVoucherData(res.data);
         setFilteredVouchers(res.data);
+        console.log('voucherData:', res.data);
       } catch (error) {
         setLoading(false);
         console.log(error);
@@ -71,8 +72,8 @@ export default function Discount() {
   const getVoucherStats = () => {
     const total = voucherData.length;
     const percent = voucherData.filter((v) => v.by === "percent").length;
-    const fixed = voucherData.filter((v) => v.by === "fixed").length;
-    return { total, percent, fixed };
+    const amount = voucherData.filter((v) => v.by === "amount").length;
+    return { total, percent, amount };
   };
 
   const stats = getVoucherStats();
@@ -117,7 +118,7 @@ export default function Discount() {
                   <div className={styles.statLabel}>Giảm %</div>
                 </div>
                 <div className={styles.statItem}>
-                  <div className={styles.statNumber}>{stats.fixed}</div>
+                  <div className={styles.statNumber}>{stats.amount}</div>
                   <div className={styles.statLabel}>Giảm VNĐ</div>
                 </div>
               </div>
@@ -150,7 +151,7 @@ export default function Discount() {
                   >
                     <option value="all">Tất cả loại</option>
                     <option value="percent">Giảm theo %</option>
-                    <option value="fixed">Giảm theo VNĐ</option>
+                    <option value="amount">Giảm theo VNĐ</option>
                   </Form.Select>
                 </Col>
                 <Col lg={2} md={4}>

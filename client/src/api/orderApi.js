@@ -9,6 +9,10 @@ const orderApi = {
         const url = `orders/${id}`
         return axiosClient.get(url, { params: {userId}})
     },
+    getOrderStats: (userId) => {
+        const url = 'orders/stats'
+        return axiosClient.get(url, { params: {userId}})
+    },
     getPayUrlMoMo: (data) => {
         const url = `orders/thanhtoan/momo`
         return axiosClient.post(url, data)

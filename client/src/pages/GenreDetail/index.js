@@ -215,15 +215,21 @@ export default function GenreDetail() {
             </div>
           ) : bookData.books && bookData.books.length > 0 ? (
             <Row className={`g-4 ${styles.productsGrid}`}>
-              {bookData.books.map((book) => (
+              {bookData.books.map((book, index) => (
                 <Col
                   key={book._id}
-                  xl={viewMode === "grid" ? 3 : 12}
-                  lg={viewMode === "grid" ? 4 : 12}
-                  md={viewMode === "grid" ? 6 : 12}
-                  sm={12}
+                  xl={3}
+                  lg={4}
+                  md={6}
+                  sm={6}
+                  xs={6}
                 >
-                  <BookItem data={book} viewMode={viewMode} />
+                  <div
+                    className={styles.productWrapper}
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                  >
+                    <BookItem data={book} boxShadow />
+                  </div>
                 </Col>
               ))}
             </Row>

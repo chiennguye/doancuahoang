@@ -6,6 +6,7 @@ const { verifyToken, checkRole } = require('../middlewares/auth')
 const { RoleEnum } = require('../utils/enum')
 
 router.get('/', verifyToken, checkRole([RoleEnum.Staff, RoleEnum.Admin]), orderController.getAll)
+router.get('/stats', verifyToken, orderController.getOrderStats)
 router.get('/:id', verifyToken, checkRole([RoleEnum.Staff, RoleEnum.Admin]), orderController.getById)
 
 router.post('/', verifyToken, orderController.create)

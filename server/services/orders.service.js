@@ -163,6 +163,25 @@ const orderService = {
             
         ])
     },
+    getOrderStats: async (query = {}) => {
+        try {
+            const [total, pending, completed, cancelled] = await Promise.all([
+                Order.countDocuments(query),
+                Order.countDocuments({ ...query, "orderStatus.code": 0 }),
+                Order.countDocuments({ ...query, "orderStatus.code": 5 }),
+                Order.countDocuments({ ...query, "orderStatus.code": 6 })
+            ]);
+
+            return {
+                total,
+                pending,
+                completed,
+                cancelled
+            };
+        } catch (error) {
+            throw error;
+        }
+    },
 }
 
 module.exports = orderService
