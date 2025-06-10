@@ -153,9 +153,11 @@ export default function OrderDetail({ data }) {
               </span>
             </div>
           </div>
-          <div className={styles.progressSection}>
-            <OrderProgress current={data?.orderStatus?.code} />
-          </div>
+          {data?.orderStatus?.text !== "Đơn hàng đã hủy" && (
+            <div className={styles.progressSection}>
+              <OrderProgress current={data?.orderStatus?.code} />
+            </div>
+          )}
         </Card.Body>
       </Card>
 
