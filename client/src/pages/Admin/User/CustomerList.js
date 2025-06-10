@@ -239,7 +239,18 @@ export default function CustomerList() {
                           <td className="price fw-bold">
                             {format.formatPrice(item?.cost?.total)}
                           </td>
-                          <td><span className="badge" style={{backgroundColor: steps?.[item?.orderStatus?.code]?.color}}>{item?.orderStatus?.text}</span></td>
+                          <td>
+                            <span 
+                              className="badge" 
+                              style={{
+                                backgroundColor: item?.orderStatus?.code === 6 
+                                  ? "#dc3545" 
+                                  : steps?.[item?.orderStatus?.code]?.color
+                              }}
+                            >
+                              {item?.orderStatus?.text}
+                            </span>
+                          </td>
                           <td>
                             <button
                               className="btn btn-primary"
